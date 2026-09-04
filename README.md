@@ -50,7 +50,16 @@ transform needed.
 | --- | --- |
 | `bg-0…5.webp` | the `BG` frame rendered as one 1512 × 10032 PNG, sliced into six 1672 px tiles |
 | `gallery-card.webp` | one "coming soon" card rendered whole — its case text sits under a frosted-glass overlay in the design, so it is not live text |
-| stickers, thumbnails, decorations | one rendered node each, resized to 2× display size (2400 px ceiling), WebP q84 |
+| stickers, thumbnails, decorations | one rendered node each, WebP; resized to 2× display size with a 2400 px ceiling — **never above the source's own resolution** |
+
+Never upscale during conversion. `sips -Z` enlarges a source that is smaller
+than the target, and interpolating up and then recompressing is what makes an
+asset look mushy. The cap is `min(2 × display, native)`.
+
+One asset is soft for a reason nothing here can fix: the third article's
+thumbnail is **399 × 501** in the Figma file and is shown at 618 × 598, so the
+browser upscales it. The node has a single image fill, so there is no
+higher-resolution version to pull — replacing it in Figma is the only fix.
 
 Originals totalled 163 MB; the optimised set is 4.4 MB.
 
