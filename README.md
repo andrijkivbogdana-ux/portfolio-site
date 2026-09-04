@@ -77,6 +77,19 @@ The hover frames carry no prototype timing, so the durations (620 ms draw,
 Keyboard: the stickers are focusable and Escape closes. Touch: tap to toggle.
 Everything softens under `prefers-reduced-motion`.
 
+## Full-bleed background
+
+The design canvas is 1512px, but the collage runs edge to edge at any width. JS
+sets `--bg-overhang` to `max(0, (viewportWidth - 1512) / 2)`; the background
+tiles and the contact meadow reach past the canvas by that much on each side.
+Below 1512px the canvas already scales to fill the viewport exactly, so the
+overhang is 0 and the tiles sit flush. Content stays on the 1512px canvas.
+
+The tiles stretch horizontally rather than cropping — `object-fit: cover` would
+make each tile crop its own middle and the six slices would stop lining up. On
+an abstract landscape the stretch reads fine to roughly 2×; past ~3000px it
+starts to show.
+
 ## Known gaps
 
 - **Fixel Display** (the CTA paragraph) is not on Google Fonts. It currently

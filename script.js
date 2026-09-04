@@ -20,6 +20,12 @@
     // the scaled canvas no longer contributes its real height to layout,
     // so the stage has to reserve it explicitly
     stage.style.height = CANVAS_H * scale + 'px';
+
+    // how far the background art has to reach past the canvas on each side to
+    // stay full-bleed. Below 1512px the canvas fills the viewport already, so
+    // this is 0 and the tiles sit flush with the edges.
+    var overhang = Math.max(0, (window.innerWidth - CANVAS_W) / 2);
+    document.documentElement.style.setProperty('--bg-overhang', overhang + 'px');
   }
 
   fit();

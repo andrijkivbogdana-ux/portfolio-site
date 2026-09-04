@@ -72,11 +72,21 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
 
 /* --- background collage -------------------------------------------------- */
 
+/* The collage is full-bleed: above 1512px the tiles stretch past the canvas by
+   --bg-overhang on each side so no bare `--sky` shows at the edges. Below
+   1512px the canvas already scales to exactly fill the viewport, so JS pins the
+   overhang to 0 and the tiles sit flush. */
 .bg img {
   position: absolute;
-  left: 0;
-  width: 1512px;
+  left: calc(0px - var(--bg-overhang, 0px));
+  width: calc(1512px + var(--bg-overhang, 0px) * 2);
   height: 1672px;
+}
+
+/* the meadow band behind the contact section is background art too */
+.full-bleed {
+  left: calc(0px - var(--bg-overhang, 0px)) !important;
+  width: calc(1512px + var(--bg-overhang, 0px) * 2) !important;
 }
 
 /* --- hero ---------------------------------------------------------------- */
