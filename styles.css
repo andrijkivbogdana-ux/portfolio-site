@@ -353,9 +353,11 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
 
 .hero-dim {
   position: absolute;
-  left: 0;
+  /* must span the same full-bleed width as the background it dims, otherwise
+     the stretched edges stay lit while the canvas darkens */
+  left: calc(0px - var(--bg-overhang, 0px));
   top: 0;
-  width: 1512px;
+  width: calc(1512px + var(--bg-overhang, 0px) * 2);
   height: 982px;
   background: rgba(0, 0, 0, .49);
   opacity: 0;
