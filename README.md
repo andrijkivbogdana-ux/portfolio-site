@@ -21,15 +21,24 @@ document height is exactly 10761 px.
 
 ## Assets
 
-`assets/img/` holds 69 files (8.3 MB), all exported from Figma:
+`assets/img/` holds 38 files (4.4 MB), all exported from Figma.
+
+**Every standalone image is a rendered Figma node, not a raw image fill.** This
+matters: the stickers carry rotations of up to 90°, some nodes stack two image
+fills where the lower one is switched off, one node's only fill is invisible, and
+several carry corner radii or a crop transform. Pulling the raw fill bitmap and
+placing it in a box reproduces none of that. Asking Figma to render the node
+bakes rotation, both fills, visibility, cropping and radius into the asset, and
+its `absoluteBoundingBox` is then exactly where the asset goes — no CSS
+transform needed.
 
 | what | how |
 | --- | --- |
 | `bg-0…5.webp` | the `BG` frame rendered as one 1512 × 10032 PNG, sliced into six 1672 px tiles |
 | `gallery-card.webp` | one "coming soon" card rendered whole — its case text sits under a frosted-glass overlay in the design, so it is not live text |
-| everything else | individual image fills, resized to 2× display size (2400 px ceiling) and encoded as WebP q82 |
+| stickers, thumbnails, decorations | one rendered node each, resized to 2× display size (2400 px ceiling), WebP q84 |
 
-Originals totalled 163 MB; the optimised set is 8.3 MB.
+Originals totalled 163 MB; the optimised set is 4.4 MB.
 
 ## Hero hover hints
 

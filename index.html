@@ -29,19 +29,14 @@
   <!-- ================= HERO ========================================================== -->
   <section id="hero" aria-labelledby="intro">
 
-    <!-- decorative stickers, bottom layer first -->
-    <img class="a hotspot" data-hint="bread" src="assets/img/image-79e702c6.webp"  alt="" style="left:74px;top:202px;width:266px;height:265px;--rot:-1deg">
-    <img class="a hotspot" data-hint="cat" src="assets/img/image-9f5d294b.webp"  alt="" style="left:1132px;top:285px;width:380px;height:325px">
-    <img class="a hotspot" data-hint="zip" src="assets/img/image-f2cd2a7d.webp"  alt="" style="left:263px;top:425px;width:239px;height:270px;--rot:1deg">
-    <img class="a hotspot" data-hint="run" src="assets/img/image-99aa29b8.webp"  alt="" style="left:14px;top:394px;width:488px;height:420px">
-    <img class="a hotspot" data-hint="coffee" src="assets/img/image-23942608.webp"  alt="" style="left:954px;top:447px;width:375px;height:443px">
-    <img class="a hotspot" data-hint="coffee" src="assets/img/image-762b8a30.webp"  alt="" style="left:907px;top:500px;width:279px;height:279px">
-    <img class="a hotspot" data-hint="zip" src="assets/img/image-90b669de.webp"  alt="" style="left:58px;top:631px;width:315px;height:318px">
-    <img class="a hotspot" data-hint="zip" src="assets/img/image-70e5009b.webp"  alt="" style="left:1186px;top:693px;width:254px;height:289px">
-
-    <!-- portrait -->
-    <img class="a hotspot" data-hint="portrait" src="assets/img/img-6e803e12.webp" alt="Bogdana blowing a bubble gum"
-         style="left:469px;top:407px;width:575px;height:575px">
+    <!-- stickers in Figma's own z-order: the portrait, toast and sneaker sit
+         ABOVE the headline and the nav. Each is rendered from its Figma node,
+         so rotation, cropping and corner radius are baked into the asset. -->
+    <img class="a hotspot" data-hint="coffee"  src="assets/img/latte.webp"    alt="" style="left:954px;top:447px;width:375px;height:443px">
+    <img class="a hotspot" data-hint="zip"     src="assets/img/letter-z.webp" alt="" style="left:58px;top:631px;width:315px;height:318px">
+    <img class="a hotspot" data-hint="zip"     src="assets/img/letter-i.webp" alt="" style="left:263px;top:425px;width:239px;height:270px">
+    <img class="a hotspot" data-hint="zip"     src="assets/img/letter-p.webp" alt="" style="left:1186px;top:693px;width:254px;height:289px">
+    <img class="a hotspot" data-hint="cat"     src="assets/img/cat.webp"      alt="" style="left:1132px;top:285px;width:380px;height:325px">
 
     <h1 id="intro" class="a intro" style="left:375px;top:146px;width:763px">Hi, I&rsquo;m Bogdana, Product Designer with a growth mindset</h1>
 
@@ -102,6 +97,10 @@
       <a class="tab" href="#about"  style="left:651px">About</a>
       <a class="tab" href="#resume" style="left:809px">Resume</a>
     </nav>
+
+    <img class="a hotspot" data-hint="portrait" src="assets/img/portrait.webp" alt="Bogdana blowing a bubble gum" style="left:469px;top:407px;width:575px;height:575px">
+    <img class="a hotspot" data-hint="bread"    src="assets/img/toast.webp"    alt="" style="left:74px;top:202px;width:266px;height:265px">
+    <img class="a hotspot" data-hint="run"      src="assets/img/sneaker.webp"  alt="" style="left:14px;top:394px;width:488px;height:420px">
   </section>
 
   <!-- ================= WORK / GALLERY =============================================== -->
@@ -118,7 +117,7 @@
 
     <!-- 1 — image left -->
     <article class="a card" style="left:76px;top:3367px;width:1361px;height:668px">
-      <img class="thumb" src="assets/img/thumbnail-0c051777.webp" alt="" style="left:12px;top:37px;width:638px;height:619px" loading="lazy">
+      <img class="thumb" src="assets/img/article-1.webp" alt="" style="left:12px;top:37px;width:638px;height:619px" loading="lazy">
       <h3 style="left:651px;top:37px;width:664px">From &ldquo;make it like the screenshot&rdquo; to partnership: how Product Designers and Product Managers can stop slowing each other down</h3>
       <p style="left:658px;top:239px;width:664px">I once ran a workshop at MetaHat on how Product Managers and Product Designers collaborate. From my own experience, I know how critical it is for this collaboration to be strong—and to exist at all. Recently, I came across that old presentation, refined it, and turned it into an article on DOU</p>
       <a class="btn" href="#articles" style="left:667px;top:500px;width:661px;height:110px">Read the article</a>
@@ -126,7 +125,7 @@
 
     <!-- 2 — image right -->
     <article class="a card" style="left:76px;top:4033px;width:1361px;height:668px">
-      <img class="thumb" src="assets/img/thumbnail-ef9e8667.webp" alt="" style="left:710px;top:37px;width:638px;height:619px" loading="lazy">
+      <img class="thumb" src="assets/img/article-2.webp" alt="" style="left:710px;top:37px;width:638px;height:619px" loading="lazy">
       <h3 style="left:53px;top:37px;width:664px">Product design for 100 million users: where UI ends and the product begins</h3>
       <p style="left:49px;top:145px;width:664px">80% of &ldquo;product designers&rdquo; aren&rsquo;t actually product designers.<br>Why? They either only design or only talk.<br><br>In my DOU article, I break down what product design really is and which principles hold up at a scale of 100M+ users.</p>
       <a class="btn" href="#articles" style="left:34px;top:500px;width:661px;height:110px">Read the article</a>
@@ -134,7 +133,7 @@
 
     <!-- 3 — image left -->
     <article class="a card" style="left:86px;top:4695px;width:1361px;height:668px">
-      <img class="thumb" src="assets/img/thumbnail-a5ccb9c2.webp" alt="" style="left:12px;top:37px;width:638px;height:619px" loading="lazy">
+      <img class="thumb" src="assets/img/article-3.webp" alt="" style="left:12px;top:37px;width:638px;height:619px" loading="lazy">
       <h3 style="left:651px;top:60px;width:664px">Everyone is focusing on monetisation. We looked at user engagement and saw a +40% increase in ARPU</h3>
       <p style="left:656px;top:215px;width:664px">A few months ago, as part of one of the products scaling on the Kiss My Apps platform, we saw around 40 per cent growth in ARPU — and this was not the result of working with paywalls or experimenting with pricing, but of targeted activation efforts. The story began with a drop in the rebill rate for an authentication product, but in reality, this case study illustrates why growth begins well before monetisation.</p>
       <a class="btn" href="#articles" style="left:667px;top:500px;width:661px;height:110px">Read the article</a>
@@ -145,17 +144,17 @@
 
   <!-- ================= MEMES ======================================================== -->
   <section id="memes" aria-labelledby="memes-h">
-    <img class="a" src="assets/img/image-aeaa9df0.webp" alt="" style="left:-199px;top:5542px;width:1517px;height:1141px" loading="lazy">
+    <img class="a" src="assets/img/memes-panel.webp" alt="" style="left:-199px;top:5542px;width:1517px;height:1141px" loading="lazy">
     <h2 id="memes-h" class="a display" style="left:368px;top:5724px;width:778px">Break for memes</h2>
 
     <div class="a memes" id="memes-carousel" style="left:0;top:5926px;width:1512px;height:730px">
-      <figure class="slide is-active" style="left:376px;top:12px;width:786px;height:721px"><img src="assets/img/thumbnail-8af4fd54.webp" alt="Meme" loading="lazy"></figure>
-      <figure class="slide" style="left:437px;top:1px;width:626px;height:466px"><img src="assets/img/thumbnail-30f81255.webp" alt="Meme" loading="lazy"></figure>
-      <figure class="slide" style="left:440px;top:1px;width:631px;height:613px"><img src="assets/img/thumbnail-92ea24f8.webp" alt="Meme" loading="lazy"></figure>
-      <figure class="slide" style="left:449px;top:1px;width:623px;height:372px"><img src="assets/img/thumbnail-dfb83262.webp" alt="Meme" loading="lazy"></figure>
-      <figure class="slide" style="left:449px;top:1px;width:633px;height:660px"><img src="assets/img/thumbnail-95a64206.webp" alt="Meme" loading="lazy"></figure>
-      <figure class="slide" style="left:459px;top:1px;width:631px;height:613px"><img src="assets/img/container-623f4b18.webp" alt="Meme" loading="lazy"></figure>
-      <figure class="slide" style="left:467px;top:1px;width:635px;height:715px"><img src="assets/img/thumbnail-4cebd0de.webp" alt="Meme" loading="lazy"></figure>
+      <figure class="slide is-active" style="left:376px;top:12px;width:786px;height:721px"><img src="assets/img/meme-7.webp" alt="Meme" loading="lazy"></figure>
+      <figure class="slide" style="left:437px;top:1px;width:626px;height:466px"><img src="assets/img/meme-1.webp" alt="Meme" loading="lazy"></figure>
+      <figure class="slide" style="left:440px;top:1px;width:631px;height:613px"><img src="assets/img/meme-2.webp" alt="Meme" loading="lazy"></figure>
+      <figure class="slide" style="left:449px;top:1px;width:623px;height:372px"><img src="assets/img/meme-3.webp" alt="Meme" loading="lazy"></figure>
+      <figure class="slide" style="left:449px;top:1px;width:633px;height:660px"><img src="assets/img/meme-4.webp" alt="Meme" loading="lazy"></figure>
+      <figure class="slide" style="left:459px;top:1px;width:631px;height:613px"><img src="assets/img/meme-5.webp" alt="Meme" loading="lazy"></figure>
+      <figure class="slide" style="left:467px;top:1px;width:635px;height:715px"><img src="assets/img/meme-6.webp" alt="Meme" loading="lazy"></figure>
 
       <button class="mnav prev" type="button" aria-label="Previous meme">&#8249;</button>
       <button class="mnav next" type="button" aria-label="Next meme">&#8250;</button>
@@ -165,10 +164,10 @@
 
   <!-- ================= ABOUT ======================================================== -->
   <section id="about" aria-labelledby="about-h">
-    <img class="a" src="assets/img/image-26eb65c7.webp" alt="" style="left:56px;top:6299px;width:1611px;height:2257px" loading="lazy">
-    <img class="a" src="assets/img/image-3535c545.webp" alt="" style="left:189px;top:6541px;width:1140px;height:1140px" loading="lazy">
-    <img class="a" src="assets/img/create-a-highquality-3-e3c62b9b.webp" alt="" style="left:889px;top:6931px;width:449px;height:444px" loading="lazy">
-    <img class="a" src="assets/img/image-22-0592d006.webp" alt="" style="left:1123px;top:6795px;width:105px;height:168px" loading="lazy">
+    <img class="a" src="assets/img/about-frame.webp" alt="" style="left:56px;top:6299px;width:1611px;height:2257px" loading="lazy">
+    <img class="a" src="assets/img/about-photo.webp" alt="" style="left:189px;top:6541px;width:1140px;height:1140px" loading="lazy">
+    <img class="a" src="assets/img/about-orb.webp" alt="" style="left:889px;top:6931px;width:449px;height:444px" loading="lazy">
+    <img class="a" src="assets/img/about-icon.webp" alt="" style="left:1123px;top:6795px;width:105px;height:168px" loading="lazy">
 
     <h2 id="about-h" class="a display" style="left:627px;top:6943px;width:262px">About</h2>
 
@@ -184,10 +183,10 @@
     </div>
     <a class="a btn btn-attached" href="#about" style="left:331px;top:7995px;width:856px;height:87px">View LinkedIn</a>
 
-    <img class="a" src="assets/img/image-2013ba7b.webp" alt="" style="left:101px;top:8236px;width:1311px;height:744px;--rot:2deg" loading="lazy">
-    <img class="a" src="assets/img/image-29356e83.webp" alt="" style="left:1082px;top:8986px;width:363px;height:391px" loading="lazy">
-    <img class="a" src="assets/img/image-9275bf41.webp" alt="" style="left:336px;top:9094px;width:840px;height:717px;--rot:2deg" loading="lazy">
-    <img class="a" src="assets/img/image-4c84d4e4.webp" alt="" style="left:147px;top:9642px;width:280px;height:285px" loading="lazy">
+    <img class="a" src="assets/img/cats-1.webp" alt="" style="left:101px;top:8236px;width:1311px;height:744px" loading="lazy">
+    <img class="a" src="assets/img/cats-sticker.webp" alt="" style="left:1082px;top:8986px;width:363px;height:391px" loading="lazy">
+    <img class="a" src="assets/img/cats-2.webp" alt="" style="left:336px;top:9094px;width:840px;height:717px" loading="lazy">
+    <img class="a" src="assets/img/flower.webp" alt="" style="left:147px;top:9642px;width:280px;height:285px" loading="lazy">
   </section>
 
   <!-- ================= CONTACT ====================================================== -->
