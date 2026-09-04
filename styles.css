@@ -149,37 +149,53 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
 
 /* --- article cards ------------------------------------------------------- */
 
+/* 1340 × 622 with 12px padding, rotated ±2° about the top-left corner — the
+   same origin Figma rotates about, so left/top stay the design coordinates. */
 .card {
+  width: 1340px;
+  height: 622px;
   background: var(--card);
   border: 3px solid var(--pink-line);
   border-radius: 12px;
+  transform-origin: 0 0;
 }
 
 .card .thumb {
   position: absolute;
+  width: 618px;
+  height: 598px;
   border-radius: 8px;
-  object-fit: cover;
+  object-fit: fill;          /* Figma STRETCH */
 }
+.card .thumb-cover { object-fit: cover; }   /* Figma FILL */
 
 .card h3 {
   position: absolute;
   margin: 0;
+  width: 658px;
   font-family: var(--font-display);
   font-weight: 400;
   font-size: 40px;
-  line-height: var(--lh-display);
+  line-height: 47px;
   color: var(--ink);
 }
 
 .card p {
   position: absolute;
   margin: 0;
+  width: 658px;
   font-family: var(--font-body);
   font-weight: 300;
   font-size: 24px;
-  line-height: var(--lh-body);
+  line-height: 29px;
   color: var(--ink);
 }
+
+/* Google's Inter is a hair narrower than the cut Figma renders with, and in this
+   one paragraph that is enough for "really" to squeeze onto the first line where
+   Figma pushes it down — 6 lines instead of 7. The box keeps its 658px design
+   width; only the wrap point moves in. */
+.card p.metric-fix { padding-right: 18px; }
 
 /* --- buttons ------------------------------------------------------------- */
 
@@ -202,6 +218,9 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
 }
 .btn:hover  { filter: brightness(1.08); transform: translateY(-2px); }
 .btn:active { transform: translateY(0); }
+
+/* the article card button: fixed box, text centred inside it */
+.card-btn { width: 658px; height: 87px; }
 
 /* button welded to the bottom edge of a card */
 .btn-attached { border-radius: 0 0 12px 12px; }

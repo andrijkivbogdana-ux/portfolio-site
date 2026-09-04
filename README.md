@@ -90,6 +90,30 @@ make each tile crop its own middle and the six slices would stop lining up. On
 an abstract landscape the stretch reads fine to roughly 2×; past ~3000px it
 starts to show.
 
+## Articles block
+
+Ported from the Figma "Root Frame"
+([node 489:1830](https://www.figma.com/design/hA98tYVohqIYv10YlSnkYy/My-portfolio?node-id=489-1830)).
+
+Each card is **1340 × 622** and rotated ±2° about its top-left corner — the same
+origin Figma rotates about, so `left`/`top` stay the design coordinates and
+`transform-origin: 0 0` does the rest. Their bounding boxes (1361 × 668) are the
+box of the *rotated* card and are not what gets built.
+
+The block's own decoration is four rendered nodes: the torn grid-paper backing
+(five rotated textures flattened into one), the binder clip, the pushpin and the
+paperclip. Thumbnails stay raw image fills so they can sit unrotated inside a
+rotated card — `object-fit: cover` for the Figma `FILL` one, `fill` for the two
+`STRETCH` ones.
+
+Typography is Londrina Solid 40/47 for titles and Inter Light 24/29 for body.
+All six text blocks match their Figma heights exactly (188, 174, 141, 232, 94,
+203 px), which also means the line breaks match. One paragraph needed help:
+Google's Inter is slightly narrower than the cut Figma renders with, and in card
+two that was enough for one word to squeeze onto the previous line. The box keeps
+its 658px design width and `padding-right` moves the wrap point in — see
+`.card p.metric-fix`.
+
 ## Known gaps
 
 - **Fixel Display** (the CTA paragraph) is not on Google Fonts. It currently
