@@ -8,9 +8,21 @@
   var CANVAS_W = 1512;
   var CANVAS_H = 10761;
 
+  // The pinned area covers the heading and the slide stack together, so both
+  // stay framed while the stack plays. PER_SLIDE is how much scrolling each
+  // slide gets before it hands over to the next.
+  var MEMES_TOP  = 5724;   // "Break for memes"
+  var MEMES_H    = 932;    // down to the bottom of the tallest slide
+  var PER_SLIDE  = 320;
+
   var stage  = document.getElementById('stage');
   var canvas = document.getElementById('canvas');
   var scale  = 1;
+
+  var memeSlides = Array.prototype.slice.call(
+    document.querySelectorAll('#memes-carousel .slide'));
+  var runway  = memeSlides.length * PER_SLIDE;   // extra document height for the pin
+  var pinFrom = 0;                               // scroll offset where pinning starts
 
   /* --- keep the 1512px canvas proportionally fitted to the viewport ------- */
 
@@ -20,7 +32,11 @@
     // Below it, the whole canvas scales down so the design still fits.
     scale = Math.min(1, window.innerWidth / CANVAS_W);
     document.documentElement.style.setProperty('--scale', scale);
-    stage.style.height = CANVAS_H * scale + 'px';
+
+    // The memes block is held still while its slides play, so the document
+    // carries that much extra height and everything after it sits lower.
+    pinFrom = Math.max(0, (MEMES_TOP + MEMES_H / 2) * scale - window.innerHeight / 2);
+    stage.style.height = (CANVAS_H * scale + runway) + 'px';
 
     // how far the background has to reach past the 1512px canvas on each side to
     // stay full-bleed. Narrower than that, the canvas is already wider than the
@@ -30,7 +46,35 @@
   }
 
   fit();
-  window.addEventListener('resize', fit, { passive: true });
+  window.addEventListener('resize', function () { fit(); syncPin(); }, { passive: true });
+
+  /* --- pinned memes ------------------------------------------------------- */
+
+  // While the pin is active the canvas is pushed down by exactly as much as the
+  // page scrolls, so the view stands still and only the slides change. Past the
+  // runway the offset stays put and the page carries on as normal.
+  function pinOffset() {
+    return Math.min(Math.max(window.scrollY - pinFrom, 0), runway);
+  }
+
+  function syncPin() {
+    var off = pinOffset();
+    document.documentElement.style.setProperty('--pin', off + 'px');
+
+    if (!memeSlides.length) return;
+    var i = runway ? Math.floor(off / runway * memeSlides.length) : 0;
+    i = Math.min(memeSlides.length - 1, Math.max(0, i));
+    memeSlides.forEach(function (s, n) { s.classList.toggle('is-active', n === i); });
+  }
+
+  var pinQueued = false;
+  window.addEventListener('scroll', function () {
+    if (pinQueued) return;
+    pinQueued = true;
+    requestAnimationFrame(function () { pinQueued = false; syncPin(); });
+  }, { passive: true });
+
+  syncPin();
 
   /* --- external links open in a new tab ----------------------------------- */
 
@@ -66,48 +110,16 @@
       node = node.offsetParent;
     }
 
+    // targets after the memes block sit `runway` px further down the document
+    var extra = top > MEMES_TOP ? runway : 0;
+
     var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.scrollTo({
-      top: Math.max(0, top * scale - 24),
+      top: Math.max(0, top * scale + extra - 24),
       behavior: reduce ? 'auto' : 'smooth'
     });
   });
 
-  /* --- memes, advanced by scroll ------------------------------------------ */
-
-  var carousel = document.getElementById('memes-carousel');
-  if (!carousel) return;
-
-  var slides = Array.prototype.slice.call(carousel.querySelectorAll('.slide'));
-  if (!slides.length) return;
-  var shown = -1;
-
-  function show(next) {
-    if (next === shown) return;
-    shown = next;
-    slides.forEach(function (s, i) { s.classList.toggle('is-active', i === shown); });
-  }
-
-  // The stack cycles as the block travels through the viewport: one slide per
-  // equal share of that journey, cross-fading into the next.
-  function sync() {
-    var r = carousel.getBoundingClientRect();
-    var from = window.innerHeight;   // block's top entering at the bottom edge
-    var to   = -r.height;            // block's top leaving past the top edge
-    var p = (from - r.top) / (from - to);
-    show(Math.min(slides.length - 1, Math.max(0, Math.floor(p * slides.length))));
-  }
-
-  var pending = false;
-  function onScroll() {
-    if (pending) return;
-    pending = true;
-    requestAnimationFrame(function () { pending = false; sync(); });
-  }
-
-  window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', onScroll, { passive: true });
-  sync();
 })();
 
 /* ============================================================================

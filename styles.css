@@ -59,7 +59,9 @@ body {
      scale is 1 and the margins do the centring. Either way `top left` is the
      only origin that keeps the box inside the clipped stage. */
   margin: 0 auto;
-  transform: scale(var(--scale));
+  /* --pin holds the canvas still while the memes block plays; the translate is
+     in document pixels, so it comes before the scale. */
+  transform: translateY(var(--pin, 0px)) scale(var(--scale));
   transform-origin: top left;
 }
 

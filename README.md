@@ -139,9 +139,14 @@ its 658px design width and `padding-right` moves the wrap point in — see
 
 ## Memes block
 
-The seven meme slides sit stacked at their Figma positions and are advanced by
-scroll: as the block travels through the viewport, each slide gets an equal
-share of that journey and cross-fades into the next. There are no arrows and no
+The block pins. Scrolling into it holds the view still — heading and slide stack
+framed together — while the seven slides cross-fade one into the next, 320px of
+scroll each; past the last one the page carries on.
+
+The pin is done by pushing the canvas down by exactly as much as the page
+scrolls (`--pin`), so the view stands still without any position juggling. The
+document carries `slides × 320px` of extra height for that runway, and anchor
+navigation adds it back for targets below the block. There are no arrows and no
 pagination — scrolling is the only control.
 
 ## Known gaps
