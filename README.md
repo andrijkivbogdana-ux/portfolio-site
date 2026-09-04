@@ -31,6 +31,43 @@ document height is exactly 10761 px.
 
 Originals totalled 163 MB; the optimised set is 8.3 MB.
 
+## Hero hover hints
+
+Ported from the six `Main_Hover` frames on the Figma "Site" page
+([node 456:604](https://www.figma.com/design/hA98tYVohqIYv10YlSnkYy/My-portfolio?node-id=456-604)).
+Pointing at a hero sticker dims the rest of the hero behind 49% black, lifts
+that sticker above the dim, draws a hand-made arrow to it and drops in a label:
+
+| sticker | label |
+| --- | --- |
+| toast | I bake bread, and I love bread |
+| sneaker | Well, running is part of my life |
+| portrait | Nice to meet you |
+| fur letters Z-I-P | ZIP is my nickname |
+| latte | I'm half made of coffee |
+| cat | This is my cat |
+
+Figma's z-order puts the dimming rectangle **above** the headline and the nav,
+so those dim too — only the pointed-at sticker, its arrow and its label stay lit.
+
+Two implementation notes:
+
+- **Hit testing is per-pixel, not per-box.** The stickers are cut-out PNGs with
+  heavily overlapping rectangles — the cat's box and the latte's box share a
+  corner over empty sky — so `:hover` would fire the wrong hint, or fire one
+  over transparent background. Each sticker gets a cached, downscaled alpha map
+  and the topmost sticker that is actually opaque under the pointer wins. If a
+  canvas read is blocked (opening the page over `file://` taints it), it falls
+  back to rectangle hit testing.
+- **Arrows are inlined SVG, not `<img>`.** Each is a single stroked path, so the
+  draw-on is a `stroke-dashoffset` transition over a dash length measured at
+  runtime with `getTotalLength()` — nothing hard-coded per arrow.
+
+The hover frames carry no prototype timing, so the durations (620 ms draw,
+260 ms dim, label settling at 62% of the draw) are authored, not exported.
+Keyboard: the stickers are focusable and Escape closes. Touch: tap to toggle.
+Everything softens under `prefers-reduced-motion`.
+
 ## Known gaps
 
 - **Fixel Display** (the CTA paragraph) is not on Google Fonts. It currently

@@ -325,3 +325,106 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition-duration: .01ms !important; }
 }
+
+/* ============================================================================
+   Hero hover hints
+   Ported from the six `Main_Hover` frames on the Figma "Site" page. Each frame
+   dims the hero behind a 49% black rectangle, lifts the hovered sticker above
+   it, and draws a hand-made arrow to a rotated label.
+
+   Figma's z-order puts `Rectangle 1` above the headline and the nav, so those
+   are dimmed too — only the hovered sticker, the arrow and the label stay lit.
+
+   The frames carry no prototype timing, so the durations and easings below are
+   authored, not exported.
+   ========================================================================== */
+
+#hero { --hint-draw: 620ms; --hint-fade: 260ms; }
+
+.hero-dim {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1512px;
+  height: 982px;
+  background: rgba(0, 0, 0, .49);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--hint-fade) ease-out;
+  z-index: 5;
+}
+#hero.is-hinting .hero-dim { opacity: 1; }
+
+.hotspot { cursor: pointer; }
+.hotspot:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+
+/* the sticker being pointed at rises above the dim */
+.hotspot.is-lit {
+  z-index: 6;
+  transform: rotate(var(--rot, 0deg)) scale(1.03);
+  transition: transform var(--hint-fade) cubic-bezier(.34, 1.3, .64, 1);
+}
+
+.hint {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  z-index: 7;
+}
+
+/* --- arrow: drawn on with a dash offset set from getTotalLength() --------- */
+
+.hint-arrow {
+  position: absolute;
+  overflow: visible;
+  opacity: 0;
+}
+.hint-arrow path {
+  stroke-dashoffset: var(--len, 0);
+  transition: stroke-dashoffset var(--hint-draw) cubic-bezier(.4, 0, .2, 1);
+}
+.hint.is-on .hint-arrow      { opacity: 1; }
+.hint.is-on .hint-arrow path { stroke-dashoffset: 0; }
+
+/* --- label: lands as the arrow finishes ---------------------------------- */
+
+.hint-label {
+  position: absolute;
+  margin: 0;
+  /* Figma's label is an auto-layout frame hugging its text. Hugging here too —
+     capped at the frame's design width — reproduces its line breaks without
+     depending on the browser matching Figma's font metrics to the pixel. */
+  width: max-content;
+  max-width: var(--w);
+  padding: 8px 16px;
+  background: #fff;
+  border: 1px solid var(--pink-line);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 40px;
+  line-height: 47.32px;
+  text-align: center;
+  color: var(--pink-line);
+  transform-origin: 0 0;
+  transform: rotate(var(--rot)) scale(.94);
+  opacity: 0;
+  transition: opacity 200ms ease-out, transform 320ms cubic-bezier(.34, 1.4, .64, 1);
+}
+/* labels that occupy a single line in Figma — pinned, because Google's
+   Londrina Solid is slightly wider than the family Figma renders with and the
+   design width would otherwise force a second line */
+.hint-label--1line { white-space: nowrap; max-width: none; }
+
+.hint.is-on .hint-label {
+  opacity: 1;
+  transform: rotate(var(--rot)) scale(1);
+  transition-delay: calc(var(--hint-draw) * .62);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* no draw-on, no pop — the hint simply appears */
+  .hint-arrow path { stroke-dashoffset: 0 !important; transition: none; }
+  .hint-label { transform: rotate(var(--rot)); transition-delay: 0s; }
+  .hotspot.is-lit { transform: rotate(var(--rot, 0deg)); }
+}
