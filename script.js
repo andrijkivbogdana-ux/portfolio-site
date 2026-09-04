@@ -51,28 +51,81 @@
   /* --- pinned memes ------------------------------------------------------- */
 
   // While the pin is active the canvas is pushed down by exactly as much as the
-  // page scrolls, so the view stands still and only the slides change. Past the
+  // page scrolls, so the view stands still and only the slides move. Past the
   // runway the offset stays put and the page carries on as normal.
+  //
+  // Everything here is driven straight from the scroll offset, with no CSS
+  // transitions in the way: a transition fighting a per-frame update is what
+  // makes this kind of thing stutter. The slides cross-fade and drift on a
+  // continuous curve instead of snapping between states.
+
+  // Each slide is dealt onto the stack: it arrives opaque, sliding up into place
+  // with a slight tip, and covers the one before it. Nothing cross-fades while
+  // half-transparent — two memes showing through each other is what made the
+  // earlier version look muddy.
+  var ENTER   = 0.62;   // share of a slot spent arriving
+  var OPAQUE  = 0.12;   // share spent becoming solid — kept short so that two
+                        // memes are never visible through each other, and it
+                        // happens while the card is still far out and moving
+                        // fast, so it reads as motion rather than a fade
+  var TRAVEL  = 150;    // px the card covers on its way in
+  var RETIRE  = 2;      // slots behind before a covered slide is dropped
+  var memesHeading = document.getElementById('memes-h');
+
+  function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+
   function pinOffset() {
     return Math.min(Math.max(window.scrollY - pinFrom, 0), runway);
   }
 
   function syncPin() {
     var off = pinOffset();
-    document.documentElement.style.setProperty('--pin', off + 'px');
 
-    if (!memeSlides.length) return;
-    var i = runway ? Math.floor(off / runway * memeSlides.length) : 0;
-    i = Math.min(memeSlides.length - 1, Math.max(0, i));
-    memeSlides.forEach(function (s, n) { s.classList.toggle('is-active', n === i); });
+    // set the transform on the element, not as a custom property on :root —
+    // an inherited property invalidates every element in the page each frame
+    canvas.style.transform =
+      'translate3d(0,' + off + 'px,0) scale(' + scale + ')';
+
+    var n = memeSlides.length;
+    if (!n || !runway) return;
+
+    // slide 0 rests at the start, slide n-1 rests at the end
+    var s = off / runway * (n - 1);
+
+    for (var i = 0; i < n; i++) {
+      var u  = s - i + 1;                     // 0 = about to arrive, 1 = settled
+      var el = memeSlides[i];
+
+      if (u <= 0) { el.style.opacity = 0; continue; }
+
+      var a = clamp01(u / OPAQUE);
+      if (u > RETIRE) a *= clamp01(RETIRE + 1 - u);   // covered anyway, drop it
+      el.style.opacity = a;
+      if (a === 0) continue;
+
+      var e = clamp01(u / ENTER);
+      var k = 1 - Math.pow(1 - e, 3);         // ease-out, so it lands softly
+      var rest = 1 - k;
+      var tip  = (i % 2 ? -1 : 1) * 3.5 * rest;
+
+      el.style.transform =
+        'translate3d(0,' + (rest * TRAVEL).toFixed(2) + 'px,0)' +
+        ' rotate(' + tip.toFixed(2) + 'deg)' +
+        ' scale(' + (0.93 + 0.07 * k).toFixed(4) + ')';
+    }
+
+    // the heading drifts a touch against the stack — a hint of depth
+    if (memesHeading) {
+      memesHeading.style.transform =
+        'translate3d(0,' + (-(off / runway) * 26).toFixed(2) + 'px,0)';
+    }
   }
 
-  var pinQueued = false;
-  window.addEventListener('scroll', function () {
-    if (pinQueued) return;
-    pinQueued = true;
-    requestAnimationFrame(function () { pinQueued = false; syncPin(); });
-  }, { passive: true });
+  // Called straight from the scroll event rather than through requestAnimationFrame:
+  // the browser already coalesces scroll to at most one event per frame, and the
+  // extra rAF hop only adds a frame of lag between the wheel and the paint —
+  // which is exactly what reads as the animation dragging behind the scroll.
+  window.addEventListener('scroll', syncPin, { passive: true });
 
   syncPin();
 

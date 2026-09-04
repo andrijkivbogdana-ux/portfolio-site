@@ -144,10 +144,28 @@ framed together — while the seven slides cross-fade one into the next, 320px o
 scroll each; past the last one the page carries on.
 
 The pin is done by pushing the canvas down by exactly as much as the page
-scrolls (`--pin`), so the view stands still without any position juggling. The
-document carries `slides × 320px` of extra height for that runway, and anchor
-navigation adds it back for targets below the block. There are no arrows and no
-pagination — scrolling is the only control.
+scrolls, so the view stands still without any position juggling. The document
+carries `slides × 320px` of extra height for that runway, and anchor navigation
+adds it back for targets below the block. There are no arrows and no pagination
+— scrolling is the only control.
+
+Three things keep it from stuttering, all learned the hard way:
+
+- **No CSS transition on the slides.** Opacity and transform are written every
+  frame from the scroll offset; a transition trying to animate the same
+  properties fights those writes and the result judders.
+- **No custom property on `:root`.** The pin offset is written straight onto the
+  canvas element. An inherited custom property invalidates style for every
+  element in the page on each frame.
+- **No `requestAnimationFrame` hop.** The browser already coalesces scroll to one
+  event per frame; the extra hop only adds a frame of lag, which reads as the
+  animation dragging behind the wheel.
+
+The slides are *dealt*, not cross-faded: each arrives opaque, sliding up 150px
+on an ease-out with a slight tip, and covers the one before it. An earlier
+version cross-faded, which meant two memes showing through each other at every
+handover — the fade is now short enough (45px of scroll) that it happens while
+the card is still far out and moving fast, so it reads as motion.
 
 ## Known gaps
 

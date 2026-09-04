@@ -232,6 +232,8 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
 
 /* --- memes carousel ------------------------------------------------------ */
 
+/* Opacity and transform are written every frame from the scroll offset, so
+   there is deliberately no transition here — one would fight the other. */
 .memes .slide {
   position: absolute;
   margin: 0;
@@ -240,11 +242,25 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
   box-shadow: inset 0 0 0 3px var(--pink-line);
   border-radius: 12px;
   opacity: 0;
-  visibility: hidden;
-  transition: opacity .3s ease;
+  pointer-events: none;
+  transform-origin: 50% 50%;
+  will-change: opacity, transform;
 }
-.memes .slide.is-active { opacity: 1; visibility: visible; }
-.memes .slide img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+.memes .slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;      /* Figma FILL */
+  border-radius: 8px;
+}
+.memes .slide img.stretch { object-fit: fill; }   /* Figma STRETCH */
+
+#memes-h { will-change: transform; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* keep the cross-fade, drop the drift */
+  .memes .slide { transform: none !important; }
+  #memes-h { transform: none !important; }
+}
 
 /* --- about --------------------------------------------------------------- */
 
