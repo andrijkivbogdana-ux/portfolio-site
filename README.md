@@ -137,6 +137,13 @@ two that was enough for one word to squeeze onto the previous line. The box keep
 its 658px design width and `padding-right` moves the wrap point in — see
 `.card p.metric-fix`.
 
+## Memes block
+
+The seven meme slides sit stacked at their Figma positions and are advanced by
+scroll: as the block travels through the viewport, each slide gets an equal
+share of that journey and cross-fades into the next. There are no arrows and no
+pagination — scrolling is the only control.
+
 ## Known gaps
 
 - **Fixel Display** (the CTA paragraph) is not on Google Fonts. It currently

@@ -73,41 +73,41 @@
     });
   });
 
-  /* --- memes carousel ----------------------------------------------------- */
+  /* --- memes, advanced by scroll ------------------------------------------ */
 
   var carousel = document.getElementById('memes-carousel');
   if (!carousel) return;
 
   var slides = Array.prototype.slice.call(carousel.querySelectorAll('.slide'));
-  var dots   = carousel.querySelector('.dots');
-  var index  = 0;
-
-  slides.forEach(function (_, i) {
-    var dot = document.createElement('button');
-    dot.type = 'button';
-    dot.setAttribute('role', 'tab');
-    dot.setAttribute('aria-label', 'Meme ' + (i + 1));
-    dot.addEventListener('click', function () { show(i); });
-    dots.appendChild(dot);
-  });
+  if (!slides.length) return;
+  var shown = -1;
 
   function show(next) {
-    index = (next + slides.length) % slides.length;
-    slides.forEach(function (s, i) { s.classList.toggle('is-active', i === index); });
-    Array.prototype.forEach.call(dots.children, function (d, i) {
-      d.setAttribute('aria-selected', i === index ? 'true' : 'false');
-    });
+    if (next === shown) return;
+    shown = next;
+    slides.forEach(function (s, i) { s.classList.toggle('is-active', i === shown); });
   }
 
-  carousel.querySelector('.prev').addEventListener('click', function () { show(index - 1); });
-  carousel.querySelector('.next').addEventListener('click', function () { show(index + 1); });
+  // The stack cycles as the block travels through the viewport: one slide per
+  // equal share of that journey, cross-fading into the next.
+  function sync() {
+    var r = carousel.getBoundingClientRect();
+    var from = window.innerHeight;   // block's top entering at the bottom edge
+    var to   = -r.height;            // block's top leaving past the top edge
+    var p = (from - r.top) / (from - to);
+    show(Math.min(slides.length - 1, Math.max(0, Math.floor(p * slides.length))));
+  }
 
-  carousel.addEventListener('keydown', function (e) {
-    if (e.key === 'ArrowLeft')  show(index - 1);
-    if (e.key === 'ArrowRight') show(index + 1);
-  });
+  var pending = false;
+  function onScroll() {
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(function () { pending = false; sync(); });
+  }
 
-  show(0);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  sync();
 })();
 
 /* ============================================================================

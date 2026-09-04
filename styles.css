@@ -244,46 +244,6 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
 .memes .slide.is-active { opacity: 1; visibility: visible; }
 .memes .slide img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
 
-.mnav {
-  position: absolute;
-  top: 320px;
-  width: 64px;
-  height: 64px;
-  display: grid;
-  place-items: center;
-  font-size: 40px;
-  line-height: 1;
-  color: var(--ink);
-  background: rgba(255, 255, 255, .8);
-  border: 3px solid var(--pink-line);
-  border-radius: 50%;
-  cursor: pointer;
-  transition: background-color .18s ease;
-}
-.mnav:hover { background: #fff; }
-.mnav.prev { left: 280px; }
-.mnav.next { right: 280px; }
-
-.dots {
-  position: absolute;
-  left: 0;
-  bottom: -16px;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-}
-.dots button {
-  width: 14px;
-  height: 14px;
-  padding: 0;
-  border: 2px solid #fff;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, .45);
-  cursor: pointer;
-}
-.dots button[aria-selected="true"] { background: var(--pink); }
-
 /* --- about --------------------------------------------------------------- */
 
 .about-card {
