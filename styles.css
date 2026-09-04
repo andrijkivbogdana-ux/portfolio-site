@@ -1,0 +1,327 @@
+/* ============================================================================
+   Bogdana Andriikiv — portfolio
+   1:1 port of the Figma frame "Main" (1512 × 10761).
+
+   Layout model: every element keeps its exact Figma coordinate inside a fixed
+   1512px canvas. The canvas is scaled down as a whole (JS sets --scale), so the
+   composition stays pixel-identical to the design at any viewport width.
+   ========================================================================== */
+
+:root {
+  --canvas-w: 1512px;
+  --canvas-h: 10761px;
+  --scale: 1;
+
+  --sky:        #5da1e4;   /* root frame fill */
+  --ink:        #0c2230;   /* body / heading text */
+  --pink:       #f55dda;   /* button fill */
+  --pink-line:  #ff89eb;   /* card border */
+  --card:       #ffffff;
+
+  --font-display: "Londrina Solid", "Arial Black", sans-serif;
+  --font-body:    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /* Fixel Display is not on Google Fonts — self-host it to match the CTA exactly */
+  --font-fixel:   "Fixel Display", var(--font-body);
+
+  --lh-display: 1.18;      /* Londrina "auto" line-height in Figma */
+  --lh-body:    1.4;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--sky);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* --- canvas scaling ------------------------------------------------------ */
+
+.stage {
+  width: 100%;
+  /* JS keeps this equal to canvas height × scale so the page scrolls correctly */
+  height: calc(var(--canvas-h) * var(--scale));
+  overflow: hidden;
+}
+
+.canvas {
+  position: relative;
+  width: var(--canvas-w);
+  height: var(--canvas-h);
+  /* Below 1512px the canvas is scaled to exactly fill the viewport, so its left
+     edge is already flush and `auto` margins collapse to 0. Above 1512px the
+     scale is 1 and the margins do the centring. Either way `top left` is the
+     only origin that keeps the box inside the clipped stage. */
+  margin: 0 auto;
+  transform: scale(var(--scale));
+  transform-origin: top left;
+}
+
+/* every positioned element */
+.a {
+  position: absolute;
+  transform: rotate(var(--rot, 0deg));
+}
+
+img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
+
+/* --- background collage -------------------------------------------------- */
+
+.bg img {
+  position: absolute;
+  left: 0;
+  width: 1512px;
+  height: 1672px;
+}
+
+/* --- hero ---------------------------------------------------------------- */
+
+.intro {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 88px;
+  line-height: var(--lh-display);
+  text-align: center;
+  color: #fff;
+}
+
+/* --- navigation (header + footer) ---------------------------------------- */
+
+.nav a { text-decoration: none; }
+
+.tab {
+  position: absolute;
+  top: 10px;
+  display: flex;
+  align-items: center;
+  padding: 4px 12px;
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 32px;
+  line-height: var(--lh-display);
+  color: #fff;
+  border-radius: 8px;
+  transition: background-color .18s ease, transform .18s ease;
+}
+.tab:hover { background: rgba(255, 255, 255, .18); transform: translateY(-1px); }
+
+.logo {
+  position: absolute;
+  left: 324px;
+  top: 0;
+  display: flex;
+  align-items: center;
+  height: 56px;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 31.32px;
+  line-height: var(--lh-display);
+  text-transform: uppercase;
+  color: #fff;
+  white-space: nowrap;
+}
+.logo img { margin: 0 -8px; }
+
+.nav-lg .tab { top: 24px; }
+.logo-lg { height: 93px; font-size: 52.02px; }
+
+/* --- work cards ---------------------------------------------------------- */
+
+.card-link { display: block; transition: transform .22s ease; }
+.card-link:hover { transform: translateY(-6px); }
+.card-link img { display: block; border-radius: 12px; }
+
+/* --- article cards ------------------------------------------------------- */
+
+.card {
+  background: var(--card);
+  border: 3px solid var(--pink-line);
+  border-radius: 12px;
+}
+
+.card .thumb {
+  position: absolute;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.card h3 {
+  position: absolute;
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 40px;
+  line-height: var(--lh-display);
+  color: var(--ink);
+}
+
+.card p {
+  position: absolute;
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 24px;
+  line-height: var(--lh-body);
+  color: var(--ink);
+}
+
+/* --- buttons ------------------------------------------------------------- */
+
+.btn {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 4px;
+  background: var(--pink);
+  border-radius: 12px;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 40px;
+  line-height: var(--lh-display);
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #fff;
+  transition: filter .18s ease, transform .18s ease;
+}
+.btn:hover  { filter: brightness(1.08); transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
+
+/* button welded to the bottom edge of a card */
+.btn-attached { border-radius: 0 0 12px 12px; }
+
+/* --- memes carousel ------------------------------------------------------ */
+
+.memes .slide {
+  position: absolute;
+  margin: 0;
+  padding: 12px;
+  background: var(--card);
+  border: 3px solid var(--pink-line);
+  border-radius: 12px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .3s ease;
+}
+.memes .slide.is-active { opacity: 1; visibility: visible; }
+.memes .slide img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+
+.mnav {
+  position: absolute;
+  top: 320px;
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  font-size: 40px;
+  line-height: 1;
+  color: var(--ink);
+  background: rgba(255, 255, 255, .8);
+  border: 3px solid var(--pink-line);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color .18s ease;
+}
+.mnav:hover { background: #fff; }
+.mnav.prev { left: 280px; }
+.mnav.next { right: 280px; }
+
+.dots {
+  position: absolute;
+  left: 0;
+  bottom: -16px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+.dots button {
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .45);
+  cursor: pointer;
+}
+.dots button[aria-selected="true"] { background: var(--pink); }
+
+/* --- about --------------------------------------------------------------- */
+
+.about-card {
+  background: var(--card);
+  border: 3px solid var(--pink-line);
+  border-radius: 12px;
+  padding: 12px;
+}
+.about-body {
+  height: 100%;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.about-body p {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 24px;
+  line-height: var(--lh-body);
+  color: var(--ink);
+}
+.about-body .lead { font-weight: 700; }
+
+/* --- section headings ---------------------------------------------------- */
+
+.display {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 120px;
+  line-height: var(--lh-display);
+  text-align: center;
+  color: var(--ink);
+}
+
+.contact-h {
+  font-size: 231px;
+  color: #fff;
+}
+
+/* --- contact CTA --------------------------------------------------------- */
+
+.cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 20px 16px;
+  background: var(--card);
+  border: 4px solid var(--pink-line);
+}
+.cta p {
+  margin: 0;
+  padding: 0 20px 12px;
+  width: 645px;
+  font-family: var(--font-fixel);
+  font-weight: 700;
+  font-size: 36px;
+  line-height: 1.5;
+  letter-spacing: -0.023em;
+  text-align: center;
+  color: #000;
+}
+.cta .btn { position: relative; }
+
+/* --- motion preference --------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: .01ms !important; }
+}
