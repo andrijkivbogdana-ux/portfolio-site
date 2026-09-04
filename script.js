@@ -15,15 +15,14 @@
   /* --- keep the 1512px canvas proportionally fitted to the viewport ------- */
 
   function fit() {
-    scale = Math.min(1, window.innerWidth / CANVAS_W);
-    document.documentElement.style.setProperty('--scale', scale);
-    // the scaled canvas no longer contributes its real height to layout,
-    // so the stage has to reserve it explicitly
-    stage.style.height = CANVAS_H * scale + 'px';
+    // Content never scales — it renders at its Figma pixel size and is centred.
+    // Only the background art responds to the viewport.
+    scale = 1;
+    stage.style.height = CANVAS_H + 'px';
 
-    // how far the background art has to reach past the canvas on each side to
-    // stay full-bleed. Below 1512px the canvas fills the viewport already, so
-    // this is 0 and the tiles sit flush with the edges.
+    // how far the background has to reach past the 1512px canvas on each side to
+    // stay full-bleed. Narrower than that, the canvas is already wider than the
+    // viewport and the background covers it.
     var overhang = Math.max(0, (window.innerWidth - CANVAS_W) / 2);
     document.documentElement.style.setProperty('--bg-overhang', overhang + 'px');
   }

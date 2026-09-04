@@ -9,14 +9,24 @@ The Figma frame is a free-form collage — 1512 × 10761 px with every element o
 absolute coordinates and no auto-layout. The port keeps that model:
 
 - `.canvas` is a fixed **1512 × 10761** box; every element sits at its exact
-  Figma coordinate.
-- `script.js` sets `--scale` to `min(1, viewportWidth / 1512)` and reserves the
-  scaled height on `.stage`, so the composition stays pixel-identical at any
-  width instead of reflowing.
-- `transform-origin: top left` — the only origin that keeps the canvas inside
-  the clipped stage when it is scaled below the viewport width.
+  Figma coordinate and **never scales**. Content renders at its design pixel
+  size and is centred; below 1512px the page scrolls sideways rather than
+  shrinking the design.
+- Only the background art responds to the viewport: `--bg-overhang` is
+  `max(0, (viewportWidth - 1512) / 2)`, and the background tiles, the hero dim
+  and the contact meadow reach past the canvas by that much on each side so the
+  art stays full-bleed at any width.
 
-Verified: all key elements land within ±1 px of their Figma coordinates, and the
+**Rotation.** Figma's `rotation` maps to CSS `rotate()` **with the same sign**,
+about `transform-origin: 0 0` — the corner Figma rotates about. An element's
+`absoluteBoundingBox` is the box of the *rotated* node, so it is never the size
+to build at; use `size` + `relativeTransform` and let CSS do the rotation.
+
+**Borders.** Figma strokes are drawn inside the frame and do not offset its
+children. A CSS `border` does, so framed components use
+`box-shadow: inset 0 0 0 Npx` instead — otherwise every child lands N px off.
+
+Verified: key elements land within ±1 px of their Figma bounding boxes, and the
 document height is exactly 10761 px.
 
 ## Assets
