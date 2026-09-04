@@ -15,10 +15,12 @@
   /* --- keep the 1512px canvas proportionally fitted to the viewport ------- */
 
   function fit() {
-    // Content never scales — it renders at its Figma pixel size and is centred.
-    // Only the background art responds to the viewport.
-    scale = 1;
-    stage.style.height = CANVAS_H + 'px';
+    // Never scale up: past the 1512px design width the content stays at its
+    // Figma pixel size and is centred, and only the background stretches.
+    // Below it, the whole canvas scales down so the design still fits.
+    scale = Math.min(1, window.innerWidth / CANVAS_W);
+    document.documentElement.style.setProperty('--scale', scale);
+    stage.style.height = CANVAS_H * scale + 'px';
 
     // how far the background has to reach past the 1512px canvas on each side to
     // stay full-bleed. Narrower than that, the canvas is already wider than the
@@ -29,6 +31,18 @@
 
   fit();
   window.addEventListener('resize', fit, { passive: true });
+
+  /* --- external links open in a new tab ----------------------------------- */
+
+  // Applied here rather than per-link so that swapping a placeholder anchor for
+  // a real URL is enough — nothing else has to be remembered.
+  Array.prototype.forEach.call(document.links, function (a) {
+    var href = a.getAttribute('href') || '';
+    if (!/^https?:/i.test(href)) return;          // in-page anchors and mailto stay put
+    if (a.hostname === location.hostname) return; // same site
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+  });
 
   /* --- anchor navigation, corrected for the scale ------------------------- */
 

@@ -3,8 +3,9 @@
    1:1 port of the Figma frame "Main" (1512 × 10761).
 
    Layout model: every element keeps its exact Figma coordinate inside a fixed
-   1512px canvas. The canvas never scales — content renders at its design pixel
-   size and is centred. Only the background art stretches to the viewport.
+   1512px canvas. It never scales up: past 1512px the content keeps its design
+   pixel size and is centred while only the background stretches. Below that the
+   canvas scales down as a whole, so the composition never reflows.
    ========================================================================== */
 
 :root {
@@ -37,16 +38,16 @@ body {
   color: var(--ink);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 /* --- canvas scaling ------------------------------------------------------ */
 
 .stage {
   width: 100%;
-  height: var(--canvas-h);
-  /* no clipping: below 1512px the canvas is wider than the viewport and the page
-     scrolls sideways rather than shrinking the design */
-  overflow: visible;
+  /* JS keeps this equal to canvas height × scale so the page scrolls correctly */
+  height: calc(var(--canvas-h) * var(--scale));
+  overflow: hidden;
 }
 
 .canvas {
@@ -58,6 +59,8 @@ body {
      scale is 1 and the margins do the centring. Either way `top left` is the
      only origin that keeps the box inside the clipped stage. */
   margin: 0 auto;
+  transform: scale(var(--scale));
+  transform-origin: top left;
 }
 
 /* every positioned element */

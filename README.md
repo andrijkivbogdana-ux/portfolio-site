@@ -9,13 +9,17 @@ The Figma frame is a free-form collage — 1512 × 10761 px with every element o
 absolute coordinates and no auto-layout. The port keeps that model:
 
 - `.canvas` is a fixed **1512 × 10761** box; every element sits at its exact
-  Figma coordinate and **never scales**. Content renders at its design pixel
-  size and is centred; below 1512px the page scrolls sideways rather than
-  shrinking the design.
-- Only the background art responds to the viewport: `--bg-overhang` is
-  `max(0, (viewportWidth - 1512) / 2)`, and the background tiles, the hero dim
-  and the contact meadow reach past the canvas by that much on each side so the
-  art stays full-bleed at any width.
+  Figma coordinate.
+- The canvas **never scales up**. Past 1512px the content keeps its design pixel
+  size and is centred, and only the background stretches. Below 1512px the whole
+  canvas scales down (`--scale`), so the composition shrinks as one piece instead
+  of reflowing.
+- The background reaches past the canvas by `--bg-overhang`,
+  `max(0, (viewportWidth - 1512) / 2)` on each side — background tiles, the hero
+  dim and the contact meadow — so the art is full-bleed at any width.
+- External links get `target="_blank"` + `rel="noopener noreferrer"` from
+  `script.js` rather than per-link markup, so swapping a placeholder anchor for a
+  real URL is all that is needed.
 
 **Rotation.** Figma's `rotation` maps to CSS `rotate()` **with the same sign**,
 about `transform-origin: 0 0` — the corner Figma rotates about. An element's
