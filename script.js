@@ -207,6 +207,9 @@
     var x = (clientX - box.left) / scale;
     var y = (clientY - box.top)  / scale;
 
+    // nothing below the hero can be a hotspot — skip the per-sticker work
+    if (y < 0 || y > 982) return null;
+
     for (var i = 0; i < stackOrder.length; i++) {
       var el = stackOrder[i];
       var l = el.offsetLeft, t = el.offsetTop, w = el.offsetWidth, h = el.offsetHeight;
@@ -216,8 +219,12 @@
     return null;
   }
 
+  // Listen on the document, not on #hero. Every child of #hero is absolutely
+  // positioned, so the section collapses to zero height and has no hit area of
+  // its own: moves over a sticker still bubble up to it, but moves over the
+  // background never reach it, and the open hint would stay stuck.
   var queued = false;
-  hero.addEventListener('mousemove', function (e) {
+  document.addEventListener('mousemove', function (e) {
     if (queued) return;
     queued = true;
     requestAnimationFrame(function () {
@@ -225,8 +232,10 @@
       var el = hitAt(e.clientX, e.clientY);
       if (el) open(el.dataset.hint); else close();
     });
-  });
-  hero.addEventListener('mouseleave', close);
+  }, { passive: true });
+
+  // pointer left the window entirely
+  document.addEventListener('mouseleave', close);
 
   /* --- keyboard + touch --------------------------------------------------- */
 
@@ -242,8 +251,10 @@
     el.addEventListener('blur', close);
   });
 
-  // touch has no hover: tap the sticker itself to toggle its hint
-  hero.addEventListener('click', function (e) {
+  // touch has no hover: tap the sticker itself to toggle its hint. On the
+  // document for the same reason as mousemove — a tap on the background has to
+  // be able to dismiss an open hint.
+  document.addEventListener('click', function (e) {
     var el = hitAt(e.clientX, e.clientY);
     if (!el) { close(); return; }
     if (active === el.dataset.hint) close(); else open(el.dataset.hint);
