@@ -155,12 +155,22 @@
 
     e.preventDefault();
 
-    // offsetTop is measured in unscaled canvas pixels
-    var top = 0;
-    var node = target;
-    while (node && node !== canvas) {
-      top += node.offsetTop;
-      node = node.offsetParent;
+    // Every section is a zero-height static wrapper — its children are all
+    // absolutely positioned, so the section's own offsetTop is 0 and measuring
+    // it would send every nav link back to the top of the page. `data-anchor`
+    // carries the canvas y the block starts at, in the same unscaled Figma
+    // pixels as the inline `top` on each element. Anything without one (a
+    // heading, a card) is measured the usual way.
+    var top;
+    if (target.hasAttribute('data-anchor')) {
+      top = parseFloat(target.getAttribute('data-anchor')) || 0;
+    } else {
+      top = 0;
+      var node = target;
+      while (node && node !== canvas) {
+        top += node.offsetTop;
+        node = node.offsetParent;
+      }
     }
 
     // targets after the memes block sit `runway` px further down the document

@@ -20,6 +20,12 @@ absolute coordinates and no auto-layout. The port keeps that model:
 - External links get `target="_blank"` + `rel="noopener noreferrer"` from
   `script.js` rather than per-link markup, so swapping a placeholder anchor for a
   real URL is all that is needed.
+- **Section anchors** carry a `data-anchor` — the canvas y the block starts at,
+  in the same unscaled Figma pixels as every inline `top`. Sections are only
+  wrappers: their children are all absolutely positioned, so a section's own
+  `offsetTop` is 0 and measuring it would send every nav link back to the top of
+  the page. The nav bar and the footer share one delegated handler, so a block
+  moves by editing its `data-anchor` and nothing else.
 
 **Rotation.** Figma's `rotation` maps to CSS `rotate()` **with the same sign**,
 about `transform-origin: 0 0` — the corner Figma rotates about. An element's
@@ -177,6 +183,10 @@ the card is still far out and moving fast, so it reads as motion.
   in the Figma file to port.
 - Nav links, article links and the work cards point at in-page anchors. Swap in
   real URLs when the case studies and articles are published.
+- **Resume** points at `assets/resume.pdf`, which is not in the repo yet. Drop
+  the PDF in at exactly that path and the tab works — the anchors already carry
+  `target="_blank"` in both the nav bar and the footer, since `script.js` only
+  re-targets cross-host `http(s):` links and a same-origin file is not one.
 
 ## Run
 
