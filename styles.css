@@ -191,6 +191,29 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
   z-index: 2;
 }
 
+/* The whole card is the link. The anchor fills the card exactly, which makes it
+   the containing block for everything inside — so every child keeps the raw
+   Figma left/top it already had and nothing needed re-measuring. The visual
+   button is a span now: a link inside a link is invalid, and one link is also
+   the right count for the tab order and for a screen reader, which reads the
+   heading as the link's name. */
+.card-hit {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: 12px;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* The card already answers focus with the same lift it gives the pointer, but
+   that is a hover cue, not a focus indicator — the ring is what says which
+   card the keyboard is actually on. */
+.card-hit:focus-visible {
+  outline: 4px solid var(--pink);
+  outline-offset: 8px;
+}
+
 .card .thumb {
   position: absolute;
   width: 618px;
@@ -211,18 +234,19 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
    run the photo into the copy. DOM order already encodes the layout: the two
    image-left cards open with the img, the image-right card closes with it, so
    :first-child and :last-child separate them without matching on style strings.
+   Both are counted inside .card-hit, which is the only child .card now has.
 
    Clearance, worst case: the photo's inner edge sits 20px from the text at rest
    after growth (+9px), drift (-12px) and tilt (+7px at the corner). It ends up
    further from the copy than it started. */
-.card:hover > .thumb:first-child,
-.card:focus-within > .thumb:first-child {
+.card:hover .thumb:first-child,
+.card:focus-within .thumb:first-child {
   transform: translate(-14px, -10px) rotate(-1.5deg) scale(1.03);
   filter: drop-shadow(-6px 14px 14px rgba(12, 34, 48, .38));
 }
 
-.card:hover > .thumb:last-child,
-.card:focus-within > .thumb:last-child {
+.card:hover .thumb:last-child,
+.card:focus-within .thumb:last-child {
   transform: translate(14px, -10px) rotate(1.5deg) scale(1.03);
   filter: drop-shadow(6px 14px 14px rgba(12, 34, 48, .38));
 }
@@ -239,7 +263,7 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
      border — and drop only what moves: the travel, the tilt and the growth. */
   .card, .card .thumb, .card .card-btn { transition: none; }
   .card:hover, .card:focus-within { transform: rotate(var(--rot, 0deg)); }
-  .card:hover > .thumb, .card:focus-within > .thumb { transform: none; }
+  .card:hover .thumb, .card:focus-within .thumb { transform: none; }
   .card:hover .card-btn,
   .card:focus-within .card-btn,
   .card .card-btn:hover { transform: none; }
