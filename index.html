@@ -27,16 +27,16 @@
   </div>
 
   <!-- ================= HERO ========================================================== -->
-  <section id="hero" aria-labelledby="intro">
+  <section id="hero" aria-labelledby="intro" data-anchor="0">
 
     <!-- stickers in Figma's own z-order: the portrait, toast and sneaker sit
          ABOVE the headline and the nav. Each is rendered from its Figma node,
          so rotation, cropping and corner radius are baked into the asset. -->
-    <img class="a hotspot" data-hint="coffee"  src="assets/img/latte.webp"    alt="" style="left:954px;top:447px;width:375px;height:443px">
-    <img class="a hotspot" data-hint="zip"     src="assets/img/letter-z.webp" alt="" style="left:58px;top:631px;width:315px;height:318px">
-    <img class="a hotspot" data-hint="zip"     src="assets/img/letter-i.webp" alt="" style="left:263px;top:425px;width:239px;height:270px">
-    <img class="a hotspot" data-hint="zip"     src="assets/img/letter-p.webp" alt="" style="left:1186px;top:693px;width:254px;height:289px">
-    <img class="a hotspot" data-hint="cat"     src="assets/img/cat.webp"      alt="" style="left:1132px;top:285px;width:380px;height:325px">
+    <img class="a hotspot float" data-hint="coffee"  src="assets/img/latte.webp"    alt="" style="left:954px;top:447px;width:375px;height:443px;--dx:-25px;--dy:30px;--dur:7.1s;--phase:3.2s;--tilt:1.2deg">
+    <img class="a hotspot float" data-hint="zip"     src="assets/img/letter-z.webp" alt="" style="left:58px;top:631px;width:315px;height:318px;--dx:-33px;--dy:19px;--dur:8.4s;--phase:2.5s;--tilt:-1.4deg">
+    <img class="a hotspot float" data-hint="zip"     src="assets/img/letter-i.webp" alt="" style="left:263px;top:425px;width:239px;height:270px;--dx:0px;--dy:36px;--dur:7.5s;--phase:4.1s;--tilt:1.5deg">
+    <img class="a hotspot float" data-hint="zip"     src="assets/img/letter-p.webp" alt="" style="left:1186px;top:693px;width:254px;height:289px;--dx:25px;--dy:30px;--dur:8.9s;--phase:1.2s;--tilt:1.3deg">
+    <img class="a hotspot float" data-hint="cat"     src="assets/img/cat.webp"      alt="" style="left:1132px;top:285px;width:380px;height:325px;--dx:13px;--dy:36px;--dur:6.8s;--phase:0.8s;--tilt:-1.3deg">
 
     <h1 id="intro" class="a intro" style="left:375px;top:146px;width:763px">Hi, I&rsquo;m Bogdana, Product Designer with a growth mindset</h1>
 
@@ -90,21 +90,19 @@
       <a class="tab" href="#work"     style="left:0px">Work</a>
       <a class="tab" href="#articles" style="left:142px">Articles</a>
       <a class="logo" href="#hero" aria-label="andriqiv designnn — home">
-        <span>andriqiv</span>
-        <img src="assets/img/logo-gem.webp" alt="" width="39" height="41">
-        <span>designnn</span>
+        <img src="assets/svg/logo.svg" alt="" width="263" height="56">
       </a>
       <a class="tab" href="#about"  style="left:651px">About</a>
-      <a class="tab" href="#resume" style="left:809px">Resume</a>
+      <a class="tab" href="assets/resume.pdf" target="_blank" rel="noopener noreferrer" style="left:809px">Resume</a>
     </nav>
 
     <img class="a hotspot" data-hint="portrait" src="assets/img/portrait.webp" alt="Bogdana blowing a bubble gum" style="left:469px;top:407px;width:575px;height:575px">
-    <img class="a hotspot" data-hint="bread"    src="assets/img/toast.webp"    alt="" style="left:74px;top:202px;width:266px;height:265px">
-    <img class="a hotspot" data-hint="run"      src="assets/img/sneaker.webp"  alt="" style="left:14px;top:394px;width:488px;height:420px">
+    <img class="a hotspot float" data-hint="bread"    src="assets/img/toast.webp"    alt="" style="left:74px;top:202px;width:266px;height:265px;--dx:-13px;--dy:36px;--dur:6.4s;--phase:0s;--tilt:1.7deg">
+    <img class="a hotspot float" data-hint="run"      src="assets/img/sneaker.webp"  alt="" style="left:14px;top:394px;width:488px;height:420px;--dx:34px;--dy:20px;--dur:7.8s;--phase:1.7s;--tilt:-1.0deg">
   </section>
 
   <!-- ================= WORK / GALLERY =============================================== -->
-  <section id="work" aria-label="Selected work">
+  <section id="work" aria-label="Selected work" data-anchor="1065">
     <a class="a card-link" href="#work" style="left:84px;top:1065px"><img src="assets/img/gallery-card.webp" alt="Case study — coming soon" width="650" height="873" loading="lazy"></a>
     <a class="a card-link" href="#work" style="left:778px;top:1065px"><img src="assets/img/gallery-card.webp" alt="Case study — coming soon" width="650" height="873" loading="lazy"></a>
     <a class="a card-link" href="#work" style="left:84px;top:1982px"><img src="assets/img/gallery-card.webp" alt="Case study — coming soon" width="650" height="873" loading="lazy"></a>
@@ -116,7 +114,7 @@
        is rotated ±2° about its top-left corner, so they are built at their real
        size and rotated in CSS — their bounding boxes (1361×668) are not the card.
        ============================================================================ -->
-  <section id="articles" aria-labelledby="articles-h">
+  <section id="articles" aria-labelledby="articles-h" data-anchor="2901">
 
     <!-- block background: five rotated paper textures, rendered as one node -->
     <img class="a" src="assets/img/art-bg.webp"       alt="" style="left:52px;top:3043px;width:1406px;height:2397px" loading="lazy">
@@ -153,7 +151,7 @@
   </section>
 
   <!-- ================= MEMES ======================================================== -->
-  <section id="memes" aria-labelledby="memes-h">
+  <section id="memes" aria-labelledby="memes-h" data-anchor="5542">
     <img class="a" src="assets/img/memes-panel.webp" alt="" style="left:-199px;top:5542px;width:1517px;height:1141px" loading="lazy">
     <h2 id="memes-h" class="a display" style="left:368px;top:5724px;width:778px">Break for memes</h2>
 
@@ -170,7 +168,7 @@
   </section>
 
   <!-- ================= ABOUT ======================================================== -->
-  <section id="about" aria-labelledby="about-h">
+  <section id="about" aria-labelledby="about-h" data-anchor="6943">
     <img class="a" src="assets/img/about-frame.webp" alt="" style="left:56px;top:6299px;width:1611px;height:2257px" loading="lazy">
     <img class="a" src="assets/img/about-photo.webp" alt="" style="left:189px;top:6541px;width:1140px;height:1140px" loading="lazy">
     <img class="a" src="assets/img/about-orb.webp" alt="" style="left:889px;top:6931px;width:449px;height:444px" loading="lazy">
@@ -197,7 +195,7 @@
   </section>
 
   <!-- ================= CONTACT ====================================================== -->
-  <section id="contact" aria-labelledby="contact-h">
+  <section id="contact" aria-labelledby="contact-h" data-anchor="10022">
     <img class="a full-bleed" src="assets/img/contact-union.webp" alt="" style="left:1px;top:10071px;width:1512px;height:703px" loading="lazy">
     <h2 id="contact-h" class="a display contact-h" style="left:1px;top:10022px;width:1512px">So, shall we talk?</h2>
 
@@ -212,12 +210,10 @@
     <a class="tab" href="#work"     style="left:0px">Work</a>
     <a class="tab" href="#articles" style="left:142px">Articles</a>
     <a class="logo logo-lg" href="#hero" aria-label="andriqiv designnn — home">
-      <span>andriqiv</span>
-      <img src="assets/img/logo-gem-lg.webp" alt="" width="64" height="68">
-      <span>designnn</span>
+      <img src="assets/svg/logo.svg" alt="" width="437" height="93">
     </a>
     <a class="tab" href="#about"  style="left:825px">About</a>
-    <a class="tab" href="#resume" style="left:983px">Resume</a>
+    <a class="tab" href="assets/resume.pdf" target="_blank" rel="noopener noreferrer" style="left:983px">Resume</a>
   </footer>
 
 </div>

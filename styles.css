@@ -124,25 +124,20 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
 }
 .tab:hover { background: rgba(255, 255, 255, .18); transform: translateY(-1px); }
 
+/* Exported one-to-one from Figma (LOGO, node 684:428): the wordmark is already
+   outlined, so the lettering no longer depends on the display font loading. */
 .logo {
   position: absolute;
   left: 324px;
   top: 0;
-  display: flex;
-  align-items: center;
+  display: block;
   height: 56px;
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 31.32px;
-  line-height: var(--lh-display);
-  text-transform: uppercase;
-  color: #fff;
-  white-space: nowrap;
 }
-.logo img { margin: 0 -8px; }
+.logo img { display: block; width: 263px; height: 56px; }
 
 .nav-lg .tab { top: 24px; }
-.logo-lg { height: 93px; font-size: 52.02px; }
+.logo-lg { height: 93px; }
+.logo-lg img { width: 437px; height: 93px; }
 
 /* --- work cards ---------------------------------------------------------- */
 
@@ -370,6 +365,38 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
 .hotspot { cursor: pointer; }
 .hotspot:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
 
+/* --- the hero collage levitates ------------------------------------------ */
+
+/* Each sticker animates the standalone `translate` and `rotate` properties
+   rather than `transform`. They compose ahead of it, so the Figma rotation on
+   `.a` and the `scale(1.03)` the hover adds still apply untouched — animating
+   `transform` here would have overwritten both.
+   --dx/--dy give every object its own drift axis, as a vector rather than an
+   angle: no two stickers travel the same way, so the collage reads as separate
+   things adrift instead of one sheet breathing. The pair is the full sweep, and
+   the object swings half of it either side of where Figma put it.
+   `alternate` turns a one-way keyframe pair into a there-and-back swing, and
+   ease-in-out makes it slowest at the ends, which is what reads as hovering
+   rather than sliding. The tilt runs at 1.37× the drift period: the two never
+   line up, so the pair never settles into a single visible beat. A negative
+   delay of --phase drops each sticker in mid-swing, already out of step with
+   its neighbours instead of the whole collage bobbing in unison. */
+@keyframes float-drift {
+  from { translate: calc(var(--dx, 0px) * -.5) calc(var(--dy, 30px) * -.5); }
+  to   { translate: calc(var(--dx, 0px) * .5) calc(var(--dy, 30px) * .5); }
+}
+@keyframes float-tilt {
+  from { rotate: var(--tilt, 1.2deg); }
+  to   { rotate: calc(var(--tilt, 1.2deg) * -1); }
+}
+
+.float {
+  animation:
+    float-drift var(--dur, 7s) ease-in-out infinite alternate,
+    float-tilt calc(var(--dur, 7s) * 1.37) ease-in-out infinite alternate;
+  animation-delay: calc(var(--phase, 0s) * -1), calc(var(--phase, 0s) * -1.6);
+}
+
 /* the sticker being pointed at rises above the dim */
 .hotspot.is-lit {
   z-index: 6;
@@ -439,7 +466,8 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* no draw-on, no pop — the hint simply appears */
+  /* the collage holds still, and no draw-on, no pop — the hint simply appears */
+  .float { animation: none; }
   .hint-arrow path { stroke-dashoffset: 0 !important; transition: none; }
   .hint-label { transform: rotate(var(--rot)); transition-delay: 0s; }
   .hotspot.is-lit { transform: rotate(var(--rot, 0deg)); }
