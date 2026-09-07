@@ -154,28 +154,40 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
   height: 622px;
   background: var(--card);
   /* Figma draws this stroke inside the frame, so it must not offset the
-     children the way a CSS border does — an inset shadow takes no layout box. */
-  box-shadow: inset 0 0 0 3px var(--pink-line);
+     children the way a CSS border does — an inset shadow takes no layout box.
+     The two outer layers are the hover's shadows held at zero: box-shadow only
+     interpolates between equal layer counts, so they must exist here to animate
+     rather than snap. Collapsed by negative spread, they render as nothing. */
+  box-shadow: inset 0 0 0 3px var(--pink-line),
+              0 0 0 -12px rgba(255, 137, 235, 0),
+              0 0 0 -30px rgba(12, 34, 48, 0);
   border-radius: 12px;
   transform-origin: 0 0;
   transition: transform .5s cubic-bezier(.2, .9, .25, 1),
               box-shadow .5s cubic-bezier(.2, .9, .25, 1);
 }
 
-/* Hover reads the block for what it is — a scatter of tilted paper. The resting
-   state is the tilt, so the hover is the card snapping level and lifting clear
-   of the pile: the inverse of the usual tilt-on-hover, and it behaves like
-   pulling one sheet off a stack. transform-origin stays 0 0 — it is what keeps
-   left/top as the raw Figma coordinates, so the whole animation is written in
-   that same frame. Levelling swings the far corner, which lets the card cross
-   its neighbours; z-index and the cast shadow are what make that read as depth
-   rather than as a collision. Keyboard users get it too — the card holds the
-   lift while the link inside it has focus. */
+/* Hover reads the block for what it is — a scatter of tilted paper with a print
+   laid on each sheet. The resting tilt is the resting state, so hovering pulls
+   the sheet off the pile: it snaps level, overshoots the way stiff paper does,
+   throws a hard offset behind itself like a misregistered risograph pass, and
+   the photo peels up off the page with it.
+
+   transform-origin stays 0 0 — it is what keeps left/top as the raw Figma
+   coordinates, so the whole move is written in that same frame. Levelling
+   swings the far corner across the neighbouring cards; the z-index and the cast
+   shadow are what make that read as depth instead of collision.
+
+   Keyboard users get the whole thing too — the card holds its lift while the
+   link inside it has focus. */
 .card:hover,
 .card:focus-within {
-  transform: rotate(0deg) translateY(-14px);
+  /* back-out easing: past level, then settles — the snap of a stiff sheet */
+  transition-timing-function: cubic-bezier(.34, 1.4, .64, 1);
+  transform: rotate(0deg) translateY(-18px);
   box-shadow: inset 0 0 0 3px var(--pink),
-              0 30px 60px -22px rgba(12, 34, 48, .55);
+              20px 22px 0 -3px var(--pink-line),
+              0 34px 64px -24px rgba(12, 34, 48, .6);
   z-index: 2;
 }
 
@@ -185,24 +197,52 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
   height: 598px;
   border-radius: 8px;
   object-fit: fill;          /* Figma STRETCH */
-  transition: transform .5s cubic-bezier(.2, .9, .25, 1);
+  transition: transform .5s cubic-bezier(.2, .9, .25, 1),
+              filter .5s ease;
 }
 .card .thumb-cover { object-fit: cover; }   /* Figma FILL */
 
-/* 1.02 is the most the photo can grow without leaving the card: it gains 6px on
-   each side, and the thinnest gap around any thumb — the 12px card padding — is
-   twice that. So it swells into its own margin and never reaches the text. */
-.card:hover .thumb,
-.card:focus-within .thumb { transform: scale(1.02); }
+/* The photo peels off the sheet: it grows, tilts, drifts outward and picks up a
+   shadow of its own, so it stops being a hole cut in the card and becomes a
+   print lying loose on top of it. Overhanging the card's outer edge is the
+   point — that is what sells "lying on top" rather than "inset into".
+
+   Direction is the one thing it must get right, because drifting inward would
+   run the photo into the copy. DOM order already encodes the layout: the two
+   image-left cards open with the img, the image-right card closes with it, so
+   :first-child and :last-child separate them without matching on style strings.
+
+   Clearance, worst case: the photo's inner edge sits 20px from the text at rest
+   after growth (+9px), drift (-12px) and tilt (+7px at the corner). It ends up
+   further from the copy than it started. */
+.card:hover > .thumb:first-child,
+.card:focus-within > .thumb:first-child {
+  transform: translate(-14px, -10px) rotate(-1.5deg) scale(1.03);
+  filter: drop-shadow(-6px 14px 14px rgba(12, 34, 48, .38));
+}
+
+.card:hover > .thumb:last-child,
+.card:focus-within > .thumb:last-child {
+  transform: translate(14px, -10px) rotate(1.5deg) scale(1.03);
+  filter: drop-shadow(6px 14px 14px rgba(12, 34, 48, .38));
+}
+
+/* The button rides up with the card. It outranks .btn:hover on specificity, so
+   the button's own hover has to be restated louder or it would read as dead
+   under the pointer that is already lifting it. */
+.card:hover .card-btn,
+.card:focus-within .card-btn { transform: translateY(-4px); }
+.card .card-btn:hover { transform: translateY(-9px); }
 
 @media (prefers-reduced-motion: reduce) {
-  /* keep the lift legible, drop the travel */
-  .card { transition: box-shadow .2s ease; }
+  /* Keep every static cue — the level snap, the offset, the shadows, the hot
+     border — and drop only what moves: the travel, the tilt and the growth. */
+  .card, .card .thumb, .card .card-btn { transition: none; }
   .card:hover, .card:focus-within { transform: rotate(var(--rot, 0deg)); }
-  .card .thumb, .card:hover .thumb, .card:focus-within .thumb {
-    transition: none;
-    transform: none;
-  }
+  .card:hover > .thumb, .card:focus-within > .thumb { transform: none; }
+  .card:hover .card-btn,
+  .card:focus-within .card-btn,
+  .card .card-btn:hover { transform: none; }
 }
 
 .card h3 {
