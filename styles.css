@@ -683,3 +683,310 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
   .hint-label { transform: rotate(var(--rot)); transition-delay: 0s; }
   .hotspot.is-lit { transform: rotate(var(--rot, 0deg)); }
 }
+
+
+/* ============================================================================
+   MOBILE — 899px and down
+   1:1 port of the Figma frame "iPhone 16 - 1" (393 × 8206), Site page.
+
+   The mobile design is not a reflow of the desktop one — it is a second canvas,
+   built the same way: every element on an absolute coordinate inside a fixed
+   box. So this block does not rebuild the page, it swaps the coordinate set.
+   Each element carries its mobile `left/top/width/height` inline as `--m-*`
+   alongside its desktop ones, and one rule below reads them.
+
+   Nothing needed re-exporting. Every rotation in the mobile frame is identical
+   to the desktop one to two decimals — the same nodes, just smaller — so every
+   asset, with its rotation already baked in, drops straight in at the mobile
+   bounding box. The work card is the same composition at 0.5435 scale (650×873
+   → 353×475, gem 275 → 149.4), so even the flat card export reuses cleanly.
+   The one exception is the About gem, rotated 10.21° further here than on the
+   desktop; it gets that difference back as a CSS rotation.
+
+   Scale mirrors the desktop rule. There it is `min(1, width / 1512)` — fit the
+   design, never past it. Here it is `min(1.35, width / 393)`: a phone narrower
+   than the frame scales down, a wider one scales up so the art still reaches
+   both edges, and past about 530px it stops and centres on the sky, exactly as
+   the desktop canvas stops at 1512.
+   ========================================================================== */
+
+@media (max-width: 899px) {
+
+  :root {
+    --canvas-w: 393px;
+    --canvas-h: 8206px;
+  }
+
+  /* The desktop canvas centres on an auto margin, which works there because it
+     only ever shrinks: at the width where the margin would matter the scale is
+     already 1. Here the canvas can be scaled up past the viewport, and an auto
+     margin centres the box before the transform rather than after — so the
+     centring is a translate that JS sizes from the scaled width. */
+  .canvas {
+    margin: 0;
+    transform: translateX(var(--m-shift, 0px)) scale(var(--scale));
+  }
+
+  /* --- the coordinate switch --------------------------------------------- */
+
+  /* `!important` throughout, and it is the point of the rule rather than a
+     smell: the desktop coordinate is an inline style on every one of these
+     elements, and an inline style is exactly what this has to reach past. The
+     mobile value is inline too, as a custom property, so both sets sit on the
+     element together and neither is hidden in a stylesheet far from the other. */
+  .a {
+    left:   var(--m-l) !important;
+    top:    var(--m-t) !important;
+    width:  var(--m-w) !important;
+    height: var(--m-h) !important;
+    transform: rotate(var(--m-rot, 0deg));
+  }
+
+  /* the mobile frame carries neither the hover hints nor a header menu */
+  .hero-dim, .hint, #hero nav .tab { display: none; }
+
+  /* The frame stacks the hero differently from the desktop one, and the DOM
+     order is the desktop's — there the portrait sits under the toast and the
+     sneaker, here it is the thing everything else is arranged around and only
+     the P is allowed over it. Paint order is the one part of a collage a
+     coordinate cannot carry, so it comes back as z-index rather than as a
+     second DOM. The eight run bottom to top exactly as Figma lists them, and
+     all of them clear the headline and the wordmark, which the frame puts
+     underneath. */
+  .s-cat      { z-index: 1; }
+  .s-latte    { z-index: 2; }
+  .s-toast    { z-index: 3; }
+  .s-z        { z-index: 4; }
+  .s-i        { z-index: 5; }
+  .s-sneaker  { z-index: 6; }
+  .s-portrait { z-index: 7; }
+  .s-p        { z-index: 8; }
+
+  /* --- background --------------------------------------------------------- */
+
+  /* The frame drops the desktop BG in whole — 1512 wide at x -559 — and lets
+     the 393px artboard crop it. So the tiles keep their design width and their
+     design `top`, and only move left. That also makes them full-bleed on their
+     own: 1512 design px is wider than this breakpoint can ever be, so there is
+     no overhang to compute. */
+  .bg img {
+    left: -559px;
+    width: 1512px;
+    height: 1672px;
+  }
+  .full-bleed { left: var(--m-l) !important; width: var(--m-w) !important; }
+
+  /* --- hero --------------------------------------------------------------- */
+
+  .intro { font-size: 54px; }
+
+  /* the wordmark is the whole of the header here, and it sits left */
+  #hero .logo { left: 65px; top: 9px; }
+
+  /* --- section headings ---------------------------------------------------- */
+
+  .display { font-size: 54px; }
+
+  /* --- work ---------------------------------------------------------------- */
+
+  /* 0.5435 of the desktop card, which is what the frame is: 650×873 → 353×475.
+     The gem's travel goes with it — written as a share of the gem's own height
+     it is the same number at either size, so the four inline pixel values are
+     replaced by one. */
+  .card-link .card-bg  { width: 353px; height: 474.8px; }
+  .card-link .card-gem {
+    left: 102.6px !important; top: 63.6px !important;
+    width: 149.4px; height: 297px;
+    --gem-to: translate(0, -47.9%) scale(.2852) !important;
+  }
+  .card-link .card-face {
+    left: 59.2px; top: 117.9px;
+    width: 236.4px; height: 270.1px;
+  }
+
+  /* The artboard can only show the card at rest, and a phone has no hover to
+     move it — but the move is the card. So it plays once as the card comes up
+     into the viewport and holds the open pose: same two transitions, same
+     easing, only the trigger changes. See the observer at the end of script.js. */
+  .card-link.is-revealed .card-gem  { transform: var(--gem-to); }
+  .card-link.is-revealed .card-face { opacity: 1; transform: none; }
+
+  /* --- articles ------------------------------------------------------------ */
+
+  /* the paper backing is a tall column here rather than a wide sheet, so it
+     crops to the box instead of stretching into it */
+  #articles > img[src$="art-bg.webp"] { object-fit: cover; }
+
+  /* Figma strokes this card on the OUTSIDE at 27%, not the desktop's solid
+     inset edge — so it is the About card's treatment, at the article's scale. */
+  .card {
+    padding: 5.82px;
+    border-radius: 5.82px;
+    box-shadow: 0 0 0 1.46px rgba(255, 137, 235, .27);
+  }
+  /* A tap fires :hover and leaves it fired, so the sheet would come off the
+     pile and stay off. The static cues stay; the movement goes. */
+  .card:hover, .card:focus-within {
+    transform: rotate(var(--m-rot, 0deg));
+    box-shadow: 0 0 0 1.46px var(--pink);
+  }
+  .card:hover .thumb, .card:focus-within .thumb { transform: none; filter: none; }
+  .card:hover .card-btn, .card:focus-within .card-btn { transform: none; }
+
+  .card h3 { font-size: 19.4px; line-height: 23px; }
+  .card p  { font-size: 11.64px; line-height: 14px; padding-right: 0; }
+
+  /* The desktop's fix for this paragraph is the opposite of the one it needs
+     here: there Google's Inter is narrow enough to pull a word up, and padding
+     pushes the wrap back in. At 11.64px it comes out a line long instead, and
+     the card's height is fixed, so the sixth line would run into the button.
+     A hairline of tracking takes it back to the design's five. It holds from
+     -0.15px down past -0.70px, so -0.3 sits with room either side of whatever
+     Inter ships next — and 2.6% of the em is invisible at this size. */
+  .card p.metric-fix { letter-spacing: -0.3px; }
+  .card .card-btn { font-size: 19.4px; padding: 0; }
+  .card .thumb { border-radius: 4px; }
+
+  /* Every one of these carries a desktop coordinate inline. They are laid out
+     per card because the frame sizes each card's photo to its own copy. */
+  .card:nth-of-type(1) .thumb    { left: 16.2px !important; top:   5.8px !important; width: 341.1px; height: 330px; }
+  .card:nth-of-type(1) h3        { left: 27.2px !important; top: 347.5px !important; width: 319.2px; }
+  .card:nth-of-type(1) p         { left: 27.2px !important; top: 446.3px !important; width: 319.2px; }
+  .card:nth-of-type(1) .card-btn { left: 27.2px !important; top: 537.1px !important; width: 319.2px; height: 42.4px; }
+
+  .card:nth-of-type(2) .thumb    { left:  7.4px !important; top:   5.8px !important; width: 358.7px; height: 347.1px; }
+  .card:nth-of-type(2) h3        { left: 27.2px !important; top: 364.5px !important; width: 319.2px; }
+  .card:nth-of-type(2) p         { left: 27.2px !important; top: 440.3px !important; width: 319.2px; }
+  .card:nth-of-type(2) .card-btn { left: 27.2px !important; top: 559.1px !important; width: 319.2px; height: 42.4px; }
+
+  .card:nth-of-type(3) .thumb    { left: 10.4px !important; top:   5.8px !important; width: 352.8px; height: 341.4px; }
+  .card:nth-of-type(3) h3        { left: 15.5px !important; top: 358.8px !important; width: 342.5px; }
+  .card:nth-of-type(3) p         { left: 15.5px !important; top: 411.6px !important; width: 342.5px; }
+  .card:nth-of-type(3) .card-btn { left: 15.5px !important; top: 488.4px !important; width: 342.5px; height: 42.4px; }
+
+  /* --- memes --------------------------------------------------------------- */
+
+  /* `Frame 13` is a horizontal row of eight prints, 2483px of them across a
+     393px artboard with clipping off — a strip you move through, not a stack.
+     So it is built as one: the deck's scroll-driven dealing is a wheel gesture
+     and stands down here (script.js), and the row becomes a snapping swipe. */
+  .memes {
+    display: flex;
+    align-items: center;
+    gap: 17.63px;
+    padding: 0 12px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    perspective: none;
+  }
+  .memes::-webkit-scrollbar { display: none; }
+
+  /* The prints are wider than the frame's containers — the mobile design crops
+     each meme to its own box, the desktop asset is the whole print — so each
+     one is fitted inside the row's 290x300 box and keeps its own proportions.
+
+     Fitted here, not by the image: the slides carry no width/height attributes,
+     so an auto-sized box is zero until the file decodes, and eight zero-width
+     flex items sit on top of each other. Every box is written out instead, so
+     the row is laid out before a single meme has loaded. */
+  .memes .slide {
+    position: static;
+    flex: 0 0 auto;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none;
+    pointer-events: auto;
+    scroll-snap-align: center;
+  }
+  .memes .slide img { width: 100%; height: 100%; }
+
+  .memes .slide:nth-child(1) { width: 290px !important; height: 213px !important; }
+  .memes .slide:nth-child(2) { width: 290px !important; height: 281px !important; }
+  .memes .slide:nth-child(3) { width: 287px !important; height: 300px !important; }
+  .memes .slide:nth-child(4) { width: 290px !important; height: 281px !important; }
+  .memes .slide:nth-child(5) { width: 266px !important; height: 300px !important; }
+  .memes .slide:nth-child(6) { width: 290px !important; height: 266px !important; }
+  .memes .slide:nth-child(7) { width: 290px !important; height: 266px !important; }
+  .memes .slide:nth-child(8) { width: 290px !important; height: 181px !important; }
+
+  /* --- about --------------------------------------------------------------- */
+
+  .about-card { padding: 12px; }
+  .about-body { padding: 24px 20px; gap: 24px; }
+  /* Inter's "auto" line box at 16px. The six paragraphs then measure
+     38+171+114+114+76+38 and, with the five 24px gaps, fill the card's 671px
+     of content exactly — the same arithmetic the desktop card does at 24px. */
+  .about-body p { font-size: 16px; line-height: 19.36px; }
+  .about-body .keep-wrap { letter-spacing: 0; }
+
+  /* --- buttons -------------------------------------------------------------- */
+
+  .btn { font-size: 20px; padding: 0; }
+
+  /* --- contact -------------------------------------------------------------- */
+
+  /* Here the heading is a live text node booleaned into the meadow, not baked
+     into the artwork the way the desktop one is — so the exported PNG cannot
+     supply it and the element that exists for the document outline becomes the
+     heading itself. */
+  #contact-h {
+    position: absolute;
+    height: auto;
+    margin: 0;
+    clip-path: none;
+    overflow: visible;
+    white-space: normal;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 60.92px;
+    line-height: 1.18;
+    text-align: center;
+    color: rgba(255, 255, 255, .92);
+  }
+
+  /* The artwork below it is the desktop render, and that one has the lettering
+     baked in — the top 25.4% of the file is those glyphs on transparency. At
+     this box's proportions `cover` scales the image to fit the height exactly
+     and crops only sideways, so the baked words would sit right under the live
+     ones. The box is grown to 870.8 instead, which makes the crop vertical, and
+     the 243.8px above the meadow — the glyphs and 22px of clearance — is cut
+     off. What is left is 627px of meadow, at the design's own y. */
+  #contact .full-bleed {
+    top: 7342.2px !important;
+    height: 870.8px !important;
+    object-fit: cover;
+    /* A straight cut here reads as a horizon line, because the softness at the
+       top of the desktop render is its baked white gradient and the crop takes
+       exactly that away. So the edge is a fade rather than a cut: transparent
+       through the glyphs, opaque by the time the meadow has any detail in it.
+       The frame gets the same effect from a white gradient laid over the whole
+       Union, which is a fill this asset already carries — reproducing it on top
+       would only apply it twice. */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 243.8px, #000 340px);
+    mask-image: linear-gradient(to bottom, transparent 243.8px, #000 340px);
+  }
+
+  .cta { padding: 20px 16px; }
+  .cta p {
+    width: 269px;
+    padding: 0 20px 12px;
+    font-size: 20px;
+  }
+  .cta .btn { width: 309px !important; height: 44px; }
+
+  /* --- footer --------------------------------------------------------------- */
+
+  .nav-lg .logo-lg { left: 37.5px; top: 0; height: 66.6px; }
+  .nav-lg .logo-lg img { width: 313px; height: 66.6px; }
+  .nav-lg .tab { font-size: 32px; padding: 4px 12px; }
+  .nav-lg .tab:nth-of-type(1) { left: 155px !important; top:  76.6px; }
+  .nav-lg .tab:nth-of-type(2) { left: 135px !important; top: 132.6px; }
+  .nav-lg .tab:nth-of-type(4) { left: 147px !important; top: 188.6px; }
+  .nav-lg .tab:nth-of-type(5) { left: 134px !important; top: 244.6px; }
+
+  /* a lift on tap reads as a mis-tap, not a response */
+  .btn:hover, .card-link:hover, .tab:hover { transform: none; }
+}

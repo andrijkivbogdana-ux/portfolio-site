@@ -11,9 +11,13 @@ absolute coordinates and no auto-layout. The port keeps that model:
 - `.canvas` is a fixed **1512 × 10761** box; every element sits at its exact
   Figma coordinate.
 - The canvas **never scales up**. Past 1512px the content keeps its design pixel
-  size and is centred, and only the background stretches. Below 1512px the whole
-  canvas scales down (`--scale`), so the composition shrinks as one piece instead
-  of reflowing.
+  size and is centred, and only the background stretches. Between 900 and 1512px
+  the whole canvas scales down (`--scale`), so the composition shrinks as one
+  piece instead of reflowing.
+- **At 900px it swaps canvases.** The scale is already 0.6 there and the body
+  copy is down to 14px; a phone would put it at 6px. Below 900px the page
+  switches to the mobile frame's own canvas, 393 × 8206 — see
+  [Mobile layout](#mobile-layout).
 - The background reaches past the canvas by `--bg-overhang`,
   `max(0, (viewportWidth - 1512) / 2)` on each side — background tiles, the hero
   dim and the contact meadow — so the art is full-bleed at any width.
@@ -103,7 +107,9 @@ Two implementation notes:
 
 The hover frames carry no prototype timing, so the durations (620 ms draw,
 260 ms dim, label settling at 62% of the draw) are authored, not exported.
-Keyboard: the stickers are focusable and Escape closes. Touch: tap to toggle.
+Keyboard: the stickers are focusable and Escape closes. Between 900 and 1512px
+a touch device taps to toggle; below 900px the mobile frame carries no hints at
+all, so they are off entirely — arrows and button semantics both.
 Everything softens under `prefers-reduced-motion`.
 
 ## Full-bleed background
@@ -111,8 +117,11 @@ Everything softens under `prefers-reduced-motion`.
 The design canvas is 1512px, but the collage runs edge to edge at any width. JS
 sets `--bg-overhang` to `max(0, (viewportWidth - 1512) / 2)`; the background
 tiles and the contact meadow reach past the canvas by that much on each side.
-Below 1512px the canvas already scales to fill the viewport exactly, so the
-overhang is 0 and the tiles sit flush. Content stays on the 1512px canvas.
+Between 900 and 1512px the canvas already scales to fill the viewport exactly,
+so the overhang is 0 and the tiles sit flush, and content stays on the 1512px
+canvas. Below 900px the mobile canvas carries the same tiles at their design width,
+moved to x −559 as the frame places them — 1512px is wider than that breakpoint
+can be, so there is nothing left to overhang.
 
 The tiles stretch horizontally rather than cropping — `object-fit: cover` would
 make each tile crop its own middle and the six slices would stop lining up. On
@@ -178,15 +187,86 @@ the card is still far out and moving fast, so it reads as motion.
 - **Fixel Display** (the CTA paragraph) is not on Google Fonts. It currently
   falls back to Inter Bold. Self-host the family and the `--font-fixel` token
   picks it up.
-- Below 1512 px the whole canvas scales down, so on a phone the text is small.
-  A real mobile layout would need its own breakpoint — there is no mobile frame
-  in the Figma file to port.
+- The four work cards are still placeholders in the Figma file — a blurred
+  "Case Name / +11% / Metrics" behind frosted glass — so the mobile card reuses
+  the desktop's flat export rather than rebuilding that placeholder as live
+  text. Swapping in real case copy means re-exporting both.
 - Nav links, article links and the work cards point at in-page anchors. Swap in
   real URLs when the case studies and articles are published.
 - **Resume** points at `assets/resume.pdf`, which is not in the repo yet. Drop
   the PDF in at exactly that path and the tab works — the anchors already carry
   `target="_blank"` in both the nav bar and the footer, since `script.js` only
   re-targets cross-host `http(s):` links and a same-origin file is not one.
+
+## Mobile layout
+
+Ported from the Figma frame `iPhone 16 - 1` on the Site page — **393 × 8206**.
+It is not a reflow of the desktop design: it is a second canvas, built the same
+way, every element on an absolute coordinate inside a fixed box. So the mobile
+block at the end of `styles.css` does not rebuild the page, it swaps the
+coordinate set. Each element carries its mobile `left/top/width/height` inline
+as `--m-*` beside its desktop ones, and one rule reads them:
+
+```css
+.a {
+  left:  var(--m-l) !important;
+  top:   var(--m-t) !important;
+  width: var(--m-w) !important;
+  ...
+}
+```
+
+`!important` is the point of that rule rather than a smell — the desktop
+coordinate is an inline style on every one of these elements, and an inline
+style is exactly what it has to reach past. Keeping the mobile value inline too
+means both sets sit on the element together instead of a stylesheet holding half
+the answer.
+
+**Nothing needed re-exporting.** Every rotation in the mobile frame is identical
+to the desktop one to two decimals — the same nodes, just smaller — so every
+asset, with its rotation already baked in, drops straight in at the mobile
+bounding box. The work card is the same composition at 0.5435 scale (650 × 873
+→ 353 × 475, gem 275 → 149.4), so even the flat card export reuses cleanly. Two
+exceptions, both handled in CSS: the About gem is rotated 10.21° further here
+and gets that difference back as a rotation, and the contact heading is a live
+text node booleaned into the meadow rather than baked into the artwork, so the
+element that exists for the document outline becomes the heading itself.
+
+**Scale mirrors the desktop rule.** There it is `min(1, width / 1512)` — fit the
+design, never past it. Here it is `min(1.35, width / 393)`: a phone narrower
+than the frame scales down, a wider one scales up so the art still reaches both
+edges, and past about 530px it stops and centres on the sky, exactly as the
+desktop canvas stops at 1512. Centring is a translate rather than an auto
+margin, because a margin centres the box *before* the transform and past the cap
+the two disagree.
+
+The background needs no overhang here: the frame drops the desktop `BG` in whole
+— 1512 wide at x −559 — and lets the 393px artboard crop it, and 1512 design px
+is wider than this breakpoint can ever be.
+
+Three things differ from the desktop and are worth knowing:
+
+- **No header menu.** The frame keeps only the wordmark up top; the four links
+  live in the footer, stacked. Anchor navigation switches from `data-anchor` to
+  `data-m-anchor`, the same block's y on the 393 × 8206 grid.
+- **The memes are a strip.** `Frame 13` is a horizontal row of eight prints,
+  2483px of them across a 393px artboard with clipping off. So the deck's
+  scroll-driven dealing — a wheel gesture — stands down and the row becomes a
+  snapping swipe. The prints are wider than the frame's containers (the design
+  crops each meme to its own box, the asset is the whole print), so each is
+  fitted inside the row's box and keeps its own proportions.
+- **The hover hints are gone**, which the frame agrees with: their arrows are
+  single paths drawn in the 1512px frame's own coordinates and point nowhere
+  here, so the button semantics come off the stickers with them.
+
+`script.js` carries the same switch. The four scroll scenes are written in
+canvas coordinates against elements the mobile frame re-poses, so they stand
+down, and `resetScenes()` wipes every inline style they left behind — an inline
+transform would outrank the mobile rules.
+
+Verified: all 42 measured elements land within **0.01px** of their Figma
+bounding box once the hero's levitation is frozen (the stickers drift around
+their design position by design), and the document is exactly 8206 × scale.
 
 ## Run
 

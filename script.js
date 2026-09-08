@@ -33,16 +33,69 @@
     '(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)');
   var mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
 
+  // Below this width the page stops being a scaled 1512px canvas and becomes an
+  // ordinary flowing document — see the mobile block at the end of styles.css.
+  // Every scroll scene below is written in canvas coordinates and against
+  // elements the mobile layout re-poses, so in that mode they all stand down and
+  // the stylesheet has the page to itself.
+  var mqMobile = window.matchMedia('(max-width: 899px)');
+  var mobile   = mqMobile.matches;
+
+  // The mobile design is its own canvas — the Figma frame "iPhone 16 - 1",
+  // 393 x 8206 — and it is fitted by the mirror of the desktop rule. There the
+  // canvas may only shrink; here it may also grow, so the art still reaches
+  // both edges of a phone wider than the frame, and it stops at M_SCALE_MAX
+  // and centres rather than climbing all the way to the breakpoint.
+  var M_W = 393;
+  var M_SCALE_MAX = 1.35;
+
   var runway  = 0;   // extra document height the pin borrows
   var pinFrom = 0;   // scroll offset where pinning starts
 
   /* --- keep the 1512px canvas proportionally fitted to the viewport ------- */
 
   function fit() {
+    var was = mobile;
+    mobile = mqMobile.matches;
+    document.documentElement.classList.toggle('is-mobile', mobile);
+
+    if (mobile) {
+      var cw = document.documentElement.clientWidth;
+      scale = Math.min(M_SCALE_MAX, cw / M_W);
+      runway = 0; pinFrom = 0;
+      document.documentElement.style.setProperty('--scale', scale);
+      // The canvas is 1512 design px of background on a 393px frame, so it is
+      // already wider than this breakpoint can be — there is nothing to reach
+      // past and no overhang to compute.
+      document.documentElement.style.setProperty('--bg-overhang', '0px');
+      // Centring is a translate rather than an auto margin, because the margin
+      // centres the box before the scale and past the cap the two disagree.
+      document.documentElement.style.setProperty('--m-shift',
+        ((cw - M_W * scale) / 2).toFixed(2) + 'px');
+      document.documentElement.classList.remove('js-reveal');
+      // height and transform both come from the stylesheet in this mode
+      stage.style.height = '';
+      canvas.style.transform = '';
+      canvas.style.willChange = '';
+      pinCss = '';
+      // Unconditionally, not just on the crossing. A viewport change can arrive
+      // as several events in a row — a resize, then the pointer query flipping,
+      // then the width query — and if any of them lands while the width still
+      // reads as desktop, that pass draws the scenes again after the crossing
+      // has already cleaned up. Every write here is a no-op once the styles are
+      // clear, so repeating it costs nothing and closes the race.
+      resetScenes();
+      return;
+    }
+    if (was) armReveal();
+
     // Never scale up: past the 1512px design width the content stays at its
     // Figma pixel size and is centred, and only the background stretches.
     // Below it, the whole canvas scales down so the design still fits.
-    scale = Math.min(1, window.innerWidth / CANVAS_W);
+    // clientWidth, not innerWidth: a classic scrollbar is inside innerWidth but
+    // outside the box the canvas is centred in, and counting it would scale the
+    // page a scrollbar's width too wide and clip its right edge.
+    scale = Math.min(1, document.documentElement.clientWidth / CANVAS_W);
     document.documentElement.style.setProperty('--scale', scale);
 
     // The memes block is held still while its deck plays, so the document
@@ -54,7 +107,7 @@
     // how far the background has to reach past the 1512px canvas on each side to
     // stay full-bleed. Narrower than that, the canvas is already wider than the
     // viewport and the background covers it.
-    var overhang = Math.max(0, (window.innerWidth - CANVAS_W) / 2);
+    var overhang = Math.max(0, (document.documentElement.clientWidth - CANVAS_W) / 2);
     document.documentElement.style.setProperty('--bg-overhang', overhang + 'px');
 
     pinCss = '';            // the scale changed, so the cached string is stale
@@ -211,8 +264,13 @@
   // Nothing is hidden until this class is set, and it is only set once the
   // scenes are known to be present and worth playing — so with scripting off,
   // or with reduced motion, the block simply renders.
-  if (reveal.length && !mqReduce.matches) document.documentElement.classList.add('js-reveal');
-  else reveal = [];
+  var canReveal = reveal.length > 0 && !mqReduce.matches;
+  if (!canReveal) reveal = [];
+
+  // Armed per mode rather than once at startup: the mobile layout lays the
+  // block out itself and must never be handed a hidden part to reveal.
+  function armReveal() { if (canReveal) document.documentElement.classList.add('js-reveal'); }
+  if (!mobile) armReveal();
 
   function aimAbout() {                                  // reads, no writes
     var vh = window.innerHeight;
@@ -415,6 +473,12 @@
   var running = false, prevAt = 0, movedAt = 0;
 
   function frame(now) {
+    // A frame already in flight when the page crosses into the mobile layout
+    // would land after `fit()` has reset the scenes and write the desktop pose
+    // straight back over them. It stops here instead; `kick()` starts the loop
+    // again if the window comes back the other way.
+    if (mobile) { running = false; canvas.style.willChange = ''; return; }
+
     // Every read first, then every write. The About scenes are measured off
     // live element rects, and interleaving those with style writes would have
     // the browser redo layout in between.
@@ -445,6 +509,7 @@
   }
 
   function kick() {
+    if (mobile) return;
     movedAt = performance.now();
     if (running) return;
     running = true;
@@ -457,9 +522,44 @@
     requestAnimationFrame(frame);
   }
 
+  // Crossing into the mobile layout hands the page back to the stylesheet. Every
+  // scene writes inline styles, and an inline transform or opacity left over
+  // from the desktop pose would sit on top of the mobile rules and win, so each
+  // one is wiped along with the cache that would otherwise suppress the rewrite.
+  function resetScenes() {
+    for (var i = 0; i < cards.length; i++) {
+      var c = cards[i];
+      c.el.style.opacity = c.el.style.transform = '';
+      c.el.style.removeProperty('--sink');
+      c.css = c.op = c.sink = '';
+    }
+    if (heading) { heading.style.transform = ''; headCss = ''; }
+
+    for (i = 0; i < reveal.length; i++) {
+      var sc = reveal[i];
+      sc.pos = sc.target = 0;
+      for (var j = 0; j < sc.parts.length; j++) {
+        var p = sc.parts[j];
+        p.el.style.transform = p.el.style.opacity = '';
+        p.el.classList.remove('is-in');
+        p.css = p.op = ''; p.home = false;
+      }
+    }
+
+    for (i = 0; i < cats.length; i++) {
+      // opacity as well as the transform: a cat below the fold when the window
+      // crossed the breakpoint was written to 0, and inline it would stay there
+      cats[i].el.style.transform = cats[i].el.style.opacity = '';
+      cats[i].css = cats[i].op = '';
+    }
+    catsPos = catsTarget = 0;
+    deckPos = 0;
+  }
+
   // Snap the deck to where the scroll offset says it should be, with no spring
   // — on load and after a resize there is nothing to ease from.
   function settle() {
+    if (mobile) return;
     deckPos = deckTarget();
     aimAbout();
     aimCats();
@@ -478,6 +578,7 @@
   window.addEventListener('load', settle);
   if (mqPin.addEventListener) {
     mqPin.addEventListener('change', function () { fit(); settle(); });
+    mqMobile.addEventListener('change', function () { fit(); settle(); });
   }
 
   /* --- external links open in a new tab ----------------------------------- */
@@ -506,6 +607,21 @@
 
     e.preventDefault();
 
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // The mobile canvas has its own y for each block, on its own 393x8206
+    // grid, so the section carries both and the mode picks one. No runway to
+    // add back either: the deck does not pin here.
+    if (mobile) {
+      var my = parseFloat(target.getAttribute('data-m-anchor'));
+      if (!isFinite(my)) my = 0;
+      window.scrollTo({
+        top: Math.max(0, my * scale - 16),
+        behavior: reduce ? 'auto' : 'smooth'
+      });
+      return;
+    }
+
     // Every section is a zero-height static wrapper — its children are all
     // absolutely positioned, so the section's own offsetTop is 0 and measuring
     // it would send every nav link back to the top of the page. `data-anchor`
@@ -527,7 +643,6 @@
     // targets after the memes block sit `runway` px further down the document
     var extra = top > MEMES_TOP ? runway : 0;
 
-    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.scrollTo({
       top: Math.max(0, top * scale + extra - 24),
       behavior: reduce ? 'auto' : 'smooth'
@@ -559,6 +674,14 @@
 
   var HIT_ALPHA  = 24;    // 0-255; below this the pixel counts as background
   var SAMPLE_MAX = 200;   // longest side of the cached alpha map
+
+  // The hints are a desktop affordance twice over: the arrows are single paths
+  // drawn in the 1512px frame's own coordinates, so they point nowhere once the
+  // mobile layout re-poses the collage, and a tap-to-toggle hint on a phone
+  // competes with the scroll it sits under. Below the breakpoint the whole
+  // mechanism stands down — including the button semantics, which would
+  // otherwise have a screen reader announce a label that can never appear.
+  var mqMobile = window.matchMedia('(max-width: 899px)');
 
   var hotspots = Array.prototype.slice.call(hero.querySelectorAll('.hotspot'));
   var hints    = {};
@@ -609,6 +732,7 @@
   /* --- open / close ------------------------------------------------------- */
 
   function open(key) {
+    if (mqMobile.matches) return;
     if (active === key) return;
     close();
     var hint = hints[key];
@@ -664,6 +788,7 @@
   // background never reach it, and the open hint would stay stuck.
   var queued = false;
   document.addEventListener('mousemove', function (e) {
+    if (mqMobile.matches) return;
     if (queued) return;
     queued = true;
     requestAnimationFrame(function () {
@@ -676,24 +801,39 @@
   // pointer left the window entirely
   document.addEventListener('mouseleave', close);
 
+  function armHints() {
+    var on = !mqMobile.matches;
+    hotspots.forEach(function (el) {
+      var hint  = hints[el.dataset.hint];
+      var label = hint && hint.querySelector('.hint-label');
+      if (on) {
+        el.tabIndex = 0;
+        el.setAttribute('role', 'button');
+        if (label) el.setAttribute('aria-label', label.textContent);
+      } else {
+        el.removeAttribute('tabindex');
+        el.removeAttribute('role');
+        el.removeAttribute('aria-label');
+      }
+    });
+    if (!on) close();
+  }
+
   /* --- keyboard + touch --------------------------------------------------- */
 
   hotspots.forEach(function (el) {
-    var hint  = hints[el.dataset.hint];
-    var label = hint && hint.querySelector('.hint-label');
-
-    el.tabIndex = 0;
-    el.setAttribute('role', 'button');
-    if (label) el.setAttribute('aria-label', label.textContent);
-
     el.addEventListener('focus', function () { open(el.dataset.hint); });
     el.addEventListener('blur', close);
   });
+
+  armHints();
+  if (mqMobile.addEventListener) mqMobile.addEventListener('change', armHints);
 
   // touch has no hover: tap the sticker itself to toggle its hint. On the
   // document for the same reason as mousemove — a tap on the background has to
   // be able to dismiss an open hint.
   document.addEventListener('click', function (e) {
+    if (mqMobile.matches) return;
     var el = hitAt(e.clientX, e.clientY);
     if (!el) { close(); return; }
     if (active === el.dataset.hint) close(); else open(el.dataset.hint);
@@ -702,4 +842,46 @@
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') close();
   });
+})();
+
+/* ============================================================================
+   Work cards on touch
+
+   The card's whole point is what hover does to it — the plumbob shrinks and
+   rises to sit over her head while the portrait comes up under it. A phone has
+   no hover to give it, so the card plays the same move once, as it comes up
+   into the viewport, and holds the open pose. Same two transitions, same
+   easing; only the trigger changes.
+   ========================================================================== */
+
+(function () {
+  'use strict';
+
+  var mqMobile = window.matchMedia('(max-width: 899px)');
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.card-link'));
+  if (!cards.length || !window.IntersectionObserver) return;
+
+  // Reduced motion keeps the card at rest: the resting pose is the design, and
+  // the reveal is decoration on top of it.
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var io = new IntersectionObserver(function (entries) {
+    if (!mqMobile.matches) return;
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-revealed');
+      io.unobserve(entry.target);
+    });
+  }, { rootMargin: '0px 0px -22% 0px', threshold: 0.35 });
+
+  cards.forEach(function (card) { io.observe(card); });
+
+  // Back on a pointer device the class would pin the card open, so it comes off
+  // — hover is the trigger again from there.
+  if (mqMobile.addEventListener) {
+    mqMobile.addEventListener('change', function () {
+      if (mqMobile.matches) return;
+      cards.forEach(function (card) { card.classList.remove('is-revealed'); });
+    });
+  }
 })();
