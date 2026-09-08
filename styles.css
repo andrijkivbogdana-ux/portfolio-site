@@ -325,43 +325,88 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
 /* button welded to the bottom edge of a card */
 .btn-attached { border-radius: 0 0 12px 12px; }
 
-/* --- memes carousel ------------------------------------------------------ */
+/* --- memes deck ---------------------------------------------------------- */
 
-/* Opacity and transform are written every frame from the scroll offset, so
-   there is deliberately no transition here — one would fight the other. */
+/* The memes are a pile of prints being dealt onto the laptop: the next one
+   tips up into place, and the one it covers sinks back into the stack, fanned
+   out and shaded.
+
+   Opacity and transform are written every frame from the scroll offset, so
+   there is deliberately no transition here — one would fight the other. The
+   easing lives in JS instead, as a spring on the deck position, so that even a
+   stepped mouse wheel reads as a glide. */
+.memes {
+  perspective: 1600px;            /* gives the tip-up some real depth */
+  perspective-origin: 50% 42%;
+}
+
+/* Each meme ships as a finished print — white mount, pink edge, drop shadow and
+   its own couple of degrees of tilt, all baked into the asset on transparency.
+   So there is no card chrome here to draw: the box is sized to the artwork's
+   own aspect ratio and the image simply fills it. */
 .memes .slide {
   position: absolute;
   margin: 0;
-  padding: 12px;
-  background: var(--card);
-  box-shadow: inset 0 0 0 3px var(--pink-line);
-  border-radius: 12px;
   opacity: 0;
   pointer-events: none;
-  transform-origin: 50% 50%;
+  /* below centre, so the card hinges nearer its lower edge on the way in */
+  transform-origin: 50% 72%;
+  backface-visibility: hidden;
+  /* Buried cards are shaded, not faded: a print further down the pile is in
+     shadow but never see-through — two memes showing through each other is
+     what made the earlier version look muddy. It has to be a filter rather
+     than an overlay, because the artwork is a tilted card on a transparent
+     ground and a rectangle laid over it would darken the empty corners too. */
+  filter: brightness(calc(1 - 0.45 * var(--sink, 0)))
+          saturate(calc(1 - 0.32 * var(--sink, 0)));
   will-change: opacity, transform;
 }
+
 .memes .slide img {
+  display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;      /* Figma FILL */
-  border-radius: 8px;
 }
-.memes .slide img.stretch { object-fit: fill; }   /* Figma STRETCH */
 
 #memes-h { will-change: transform; }
 
 @media (prefers-reduced-motion: reduce) {
-  /* keep the cross-fade, drop the drift */
+  /* the pile still reads through the shading; only the movement goes */
   .memes .slide { transform: none !important; }
+
   #memes-h { transform: none !important; }
+}
+
+/* --- about: the folder is pulled out, then laid up ------------------------ */
+
+/* The pose of each part is written every frame from the scroll offset, so —
+   exactly as with the memes deck — there is deliberately no transition here.
+   One would fight the other. All this rule does is hide the parts until JS has
+   something to say about them, and it is armed by a class JS sets only once it
+   knows it is going to run the scenes at all: with scripting off, or with
+   reduced motion, the block simply renders. */
+.js-reveal [data-in] { opacity: 0; }
+
+/* A part that has reached its place is handed back to the stylesheet, inline
+   transform and all — which is how the button gets to keep its own hover lift
+   rather than being pinned by a written-in identity transform. Until then it
+   must not transition, or its 180ms hover ease would drag a frame behind every
+   write. */
+.js-reveal [data-in]:not(.is-in) { transition: none; }
+.js-reveal [data-in].is-in { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js-reveal [data-in] { opacity: 1; transform: rotate(var(--rot, 0deg)); }
 }
 
 /* --- about --------------------------------------------------------------- */
 
 .about-card {
   background: var(--card);
-  box-shadow: inset 0 0 0 3px var(--pink-line);
+  /* Figma has this stroke on the OUTSIDE of the 944x627 box, at 27% — not the
+     solid inset edge the other cards carry. Outside is what tucks it under the
+     button welded to the bottom, exactly as the frame does. */
+  box-shadow: 0 0 0 3px rgba(255, 137, 235, .27);
   border-radius: 12px;
   padding: 12px;
 }
@@ -377,10 +422,30 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
   font-family: var(--font-body);
   font-weight: 300;
   font-size: 24px;
-  line-height: var(--lh-body);
+  /* Figma leaves this on "auto", which for Inter at 24px lands on a 29px line
+     box — the six paragraphs then measure 1+5+3+3+2+1 lines and, with the 24px
+     gaps, fill the card's 555px of content exactly. A ratio would drift. */
+  line-height: 29px;
   color: var(--ink);
 }
-.about-body .lead { font-weight: 700; }
+
+/* The emphasis is per phrase, not per paragraph: Inter Bold for the key
+   phrases, Extra Bold where the design steps up to it, and the card's pink for
+   the ones being called out. */
+/* The Inter that Figma draws with is about 1.6% wider than the Inter v4 Google
+   Fonts serves, so one paragraph — and only this one — pulls "research," up onto
+   its first line and comes out a line short, which leaves the card 29px unfilled.
+   No global setting fixes it: tracking or a narrower measure flips this
+   paragraph to five lines and the next one to four at the very same threshold,
+   because the difference is in the glyph widths, not the spacing. A hairline of
+   tracking here is 0.4% of the em — invisible — and it holds anywhere from
+   0.02px to 0.9px, so it survives a font update in either direction. The real
+   fix is to self-host the Inter build Figma uses. */
+.about-body .keep-wrap { letter-spacing: .1px; }
+
+.about-body strong { font-weight: 700; }
+.about-body .xb    { font-weight: 800; }
+.about-body .hl    { color: var(--pink-line); }
 
 /* --- section headings ---------------------------------------------------- */
 
@@ -394,9 +459,18 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
   color: var(--ink);
 }
 
-.contact-h {
-  font-size: 231px;
-  color: #fff;
+/* The contact heading is part of the exported artwork: in Figma the words are
+   booleaned into the meadow shape, so they cannot be separated from it. This
+   element stays for the document outline and the section's aria-labelledby —
+   painting it as well laid a second, slightly differently-metricked copy of the
+   words over the baked one, which is what read as doubled letters. */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /* --- contact CTA --------------------------------------------------------- */
@@ -408,7 +482,9 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
   gap: 4px;
   padding: 20px 16px;
   background: var(--card);
-  box-shadow: inset 0 0 0 4px var(--pink-line);
+  /* Figma strokes only the top edge here — 4px, on the outside of the 677x305
+     box — not all four sides. Hence the offset shadow rather than a border. */
+  box-shadow: 0 -4px 0 var(--pink-line);
 }
 .cta p {
   margin: 0;
