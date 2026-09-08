@@ -769,6 +769,22 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
      design `top`, and only move left. That also makes them full-bleed on their
      own: 1512 design px is wider than this breakpoint can ever be, so there is
      no overhang to compute. */
+  /* The mobile frame's own copy of BG carries art down to y 7286 and nothing
+     below it — from there the frame's `#5da1e4` fill is the background. The
+     tiles in assets/ were sliced from the desktop BG, which does still have art
+     that low, and it is a near-white cyan; a white heading on it comes out at
+     about 1.15:1 and disappears. So the layer is cut at the same 7286 the frame
+     cuts at, and the sky takes over. Cut sideways by a negative inset, because
+     the tiles have to keep reaching past the canvas on both sides. */
+  .bg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: var(--canvas-w);
+    height: var(--canvas-h);
+    clip-path: inset(0 -600px calc(var(--canvas-h) - 7286px) -600px);
+  }
+
   .bg img {
     left: -559px;
     width: 1512px;
@@ -983,15 +999,12 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
     top: 7342.2px !important;
     height: 870.8px !important;
     object-fit: cover;
-    /* A straight cut here reads as a horizon line, because the softness at the
-       top of the desktop render is its baked white gradient and the crop takes
-       exactly that away. So the edge is a fade rather than a cut: transparent
-       through the glyphs, opaque by the time the meadow has any detail in it.
-       The frame gets the same effect from a white gradient laid over the whole
-       Union, which is a fill this asset already carries — reproducing it on top
-       would only apply it twice. */
-    -webkit-mask-image: linear-gradient(to bottom, transparent 243.8px, #000 340px);
-    mask-image: linear-gradient(to bottom, transparent 243.8px, #000 340px);
+    /* A straight cut, because that is what the frame has: the meadow starts as
+       a hard, fully saturated edge immediately under the lettering, and it is
+       that edge the white heading gets its contrast from. An earlier version
+       faded it in, on the theory that the hard line was the defect — the defect
+       was the stale background above it. */
+    clip-path: inset(243.8px 0 0 0);
   }
 
   .cta { padding: 20px 16px; }
