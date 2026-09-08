@@ -64,10 +64,15 @@
       scale = Math.min(M_SCALE_MAX, cw / M_W);
       runway = 0; pinFrom = 0;
       document.documentElement.style.setProperty('--scale', scale);
-      // The canvas is 1512 design px of background on a 393px frame, so it is
-      // already wider than this breakpoint can be — there is nothing to reach
-      // past and no overhang to compute.
-      document.documentElement.style.setProperty('--bg-overhang', '0px');
+      // The background tiles are 1512 design px on a 393px frame, so they reach
+      // past any viewport this breakpoint allows on their own. The contact
+      // meadow does not — it is 402 wide, barely wider than the canvas — and
+      // past the scale cap the canvas stops growing while the viewport does
+      // not, which leaves the meadow a band with sky either side of it. So it
+      // gets the same overhang the desktop gives it, in canvas px: how far the
+      // canvas has to reach on each side to cover the viewport.
+      document.documentElement.style.setProperty('--bg-overhang',
+        Math.max(0, (cw / scale - M_W) / 2).toFixed(2) + 'px');
       // Centring is a translate rather than an auto margin, because the margin
       // centres the box before the scale and past the cap the two disagree.
       document.documentElement.style.setProperty('--m-shift',

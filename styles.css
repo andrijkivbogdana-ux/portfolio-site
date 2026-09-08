@@ -774,7 +774,10 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
     width: 1512px;
     height: 1672px;
   }
-  .full-bleed { left: var(--m-l) !important; width: var(--m-w) !important; }
+  .full-bleed {
+    left:  calc(var(--m-l) - var(--bg-overhang, 0px)) !important;
+    width: calc(var(--m-w) + var(--bg-overhang, 0px) * 2) !important;
+  }
 
   /* --- hero --------------------------------------------------------------- */
 
@@ -865,6 +868,17 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
   .card:nth-of-type(3) .card-btn { left: 15.5px !important; top: 488.4px !important; width: 342.5px; height: 42.4px; }
 
   /* --- memes --------------------------------------------------------------- */
+
+  /* The laptop reads as a surface rather than an object: the frame runs it off
+     both edges of the artboard. Past the scale cap the canvas stops growing and
+     it would stop short of the viewport, so it takes the same overhang as the
+     meadow — cropping to the wider box rather than stretching, because a
+     stretched lid is obvious and a cropped one is just a slightly taller lid. */
+  #memes > img[src$="memes-panel.webp"] {
+    left:  calc(var(--m-l) - var(--bg-overhang, 0px)) !important;
+    width: calc(var(--m-w) + var(--bg-overhang, 0px) * 2) !important;
+    object-fit: cover;
+  }
 
   /* `Frame 13` is a horizontal row of eight prints, 2483px of them across a
      393px artboard with clipping off — a strip you move through, not a stack.

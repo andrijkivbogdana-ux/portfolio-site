@@ -120,8 +120,13 @@ tiles and the contact meadow reach past the canvas by that much on each side.
 Between 900 and 1512px the canvas already scales to fill the viewport exactly,
 so the overhang is 0 and the tiles sit flush, and content stays on the 1512px
 canvas. Below 900px the mobile canvas carries the same tiles at their design width,
-moved to x −559 as the frame places them — 1512px is wider than that breakpoint
-can be, so there is nothing left to overhang.
+moved to x −559 as the frame places them, and 1512px is wider than that
+breakpoint can be — so the tiles need no overhang of their own. The overhang is
+still computed there, in canvas px, for the two pieces that do: the contact
+meadow is only 402 wide and the memes laptop 837, and past the scale cap the
+canvas stops growing while the viewport does not, which would leave each of them
+a band with sky either side. The meadow stretches into it; the laptop crops,
+because a stretched lid is obvious and a cropped one is a slightly taller lid.
 
 The tiles stretch horizontally rather than cropping — `object-fit: cover` would
 make each tile crop its own middle and the six slices would stop lining up. On
@@ -240,9 +245,10 @@ desktop canvas stops at 1512. Centring is a translate rather than an auto
 margin, because a margin centres the box *before* the transform and past the cap
 the two disagree.
 
-The background needs no overhang here: the frame drops the desktop `BG` in whole
-— 1512 wide at x −559 — and lets the 393px artboard crop it, and 1512 design px
-is wider than this breakpoint can ever be.
+The background tiles need no overhang here: the frame drops the desktop `BG` in
+whole — 1512 wide at x −559 — and lets the 393px artboard crop it, and 1512
+design px is wider than this breakpoint can ever be. The contact meadow and the
+memes laptop do need one, though, and take it the same way the desktop art does.
 
 Three things differ from the desktop and are worth knowing:
 
