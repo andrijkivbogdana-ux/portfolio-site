@@ -773,17 +773,19 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
      below it — from there the frame's `#5da1e4` fill is the background. The
      tiles in assets/ were sliced from the desktop BG, which does still have art
      that low, and it is a near-white cyan; a white heading on it comes out at
-     about 1.15:1 and disappears. So the layer is cut at the same 7286 the frame
-     cuts at, and the sky takes over. Cut sideways by a negative inset, because
-     the tiles have to keep reaching past the canvas on both sides. */
-  .bg {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: var(--canvas-w);
-    height: var(--canvas-h);
-    clip-path: inset(0 -600px calc(var(--canvas-h) - 7286px) -600px);
+     about 1.2:1 and disappears.
+
+     So the art is taken away over the tile that carries it. A straight cut left
+     a line right across the page — the tile is still fully saturated where it
+     would end — so it fades instead, over the 386px above the frame's own
+     cut-off. The mask goes on the tile rather than on the layer, because the
+     tiles reach 559px past the canvas on each side and a mask on the layer is
+     bounded by the layer's box, which would take the bleed with it. */
+  .bg img[src$="bg-4.webp"] {
+    -webkit-mask-image: linear-gradient(to bottom, #000 212px, transparent 598px);
+            mask-image: linear-gradient(to bottom, #000 212px, transparent 598px);
   }
+  .bg img[src$="bg-5.webp"] { display: none; }   /* starts below the canvas */
 
   .bg img {
     left: -559px;
@@ -996,15 +998,22 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
      the 243.8px above the meadow — the glyphs and 22px of clearance — is cut
      off. What is left is 627px of meadow, at the design's own y. */
   #contact .full-bleed {
-    top: 7342.2px !important;
-    height: 870.8px !important;
+    top: 7207.7px !important;
+    height: 1005.3px !important;
     object-fit: cover;
     /* A straight cut, because that is what the frame has: the meadow starts as
        a hard, fully saturated edge immediately under the lettering, and it is
-       that edge the white heading gets its contrast from. An earlier version
-       faded it in, on the theory that the hard line was the defect — the defect
-       was the stale background above it. */
-    clip-path: inset(243.8px 0 0 0);
+       that edge the white heading gets its contrast from.
+
+       The cut is measured from the glyphs, not from the artwork's alpha. The
+       desktop render's lettering is knocked into the meadow as well as standing
+       above it, so the row where the file first goes fully opaque — 284 — is
+       only where the meadow rect starts, and the glyphs carry on over it down
+       to about 390. Cutting at the alpha edge left the tail of the leading S
+       showing under the live heading. 420 clears them with room to spare, and
+       the box is sized so that what is left still starts at the design's own
+       7586 and runs its 627px. */
+    clip-path: inset(378.3px 0 0 0);
   }
 
   .cta { padding: 20px 16px; }
