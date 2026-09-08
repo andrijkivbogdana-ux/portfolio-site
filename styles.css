@@ -790,6 +790,17 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
 
   .display { font-size: 54px; }
 
+  /* These four hug their text in Figma, so they are one line by construction —
+     and at the design width they clear it by between 0.1 and 0.5px. That is not
+     a margin, it is a coin toss: Safari rounds text metrics differently from
+     Chrome, and on a phone all four dropped to two lines, which put the contact
+     heading under the CTA card and the memes heading under the deck. Pinned to
+     one line they cannot, and since each box is already centred on the canvas,
+     text that runs wider than its box still runs wider evenly and stays centred
+     on the same axis the frame puts it on. Same fix, same reason, as the hero's
+     single-line hint labels. */
+  #articles-h, #memes-h, #about-h, #contact-h { white-space: nowrap; }
+
   /* --- work ---------------------------------------------------------------- */
 
   /* 0.5435 of the desktop card, which is what the frame is: 650×873 → 353×475.
