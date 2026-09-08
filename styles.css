@@ -141,9 +141,44 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
 
 /* --- work cards ---------------------------------------------------------- */
 
+/* Two things move on hover and nothing else does: the plumbob shrinks and rises
+   to sit over her head, and the portrait comes up under it. The rest of the card
+   — frosted panel, blurred placeholder copy, button — is one flat export, so
+   only these two are separate layers.
+
+   The numbers are Figma's own: the gem goes 275x547 -> 78x156 and its centre
+   travels 261.5px up the card. That shrink is not quite uniform — 0.2836 across,
+   0.2852 down — and a CSS scale() has to be one number, so it takes the taller
+   of the two: 0.2836 lands the height a pixel short, 0.2852 rounds both sides
+   onto Figma's. Its resting box is the design position, so the transform is the
+   whole of the change.
+
+   No position: relative here — .a has already made this absolute, and adding it
+   would win on source order and break every card's placement. */
 .card-link { display: block; transition: transform .22s ease; }
 .card-link:hover { transform: translateY(-6px); }
-.card-link img { display: block; border-radius: 12px; }
+.card-link img { display: block; }
+.card-link .card-bg { border-radius: 12px; }
+
+.card-gem,
+.card-face { position: absolute; pointer-events: none; }
+
+/* Each card has its own gem — pink, green, yellow, purple — and Figma places
+   them a pixel or two apart, so the box and the shift that lands it on the
+   hover target both come in on the element. */
+.card-gem { transition: transform .55s cubic-bezier(.2, .85, .25, 1); }
+.card-face {
+  left: 109px; top: 217px;
+  opacity: 0;
+  transform: translateY(24px) scale(.94);
+  transition: opacity .34s ease,
+              transform .55s cubic-bezier(.2, .85, .25, 1);
+}
+
+/* the gem is listed before the portrait, as in Figma, so it tucks behind her
+   head on the way up rather than riding over it */
+.card-link:hover .card-gem  { transform: var(--gem-to); }
+.card-link:hover .card-face { opacity: 1; transform: none; }
 
 /* --- article cards ------------------------------------------------------- */
 

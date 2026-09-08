@@ -263,6 +263,115 @@
       + 'scale(' + (1 - (1 - p.sc) * rest).toFixed(4) + ')');
   }
 
+  /* --- cats: the collage drifts apart as it goes past --------------------- */
+
+  // Parallax rather than another assemble — the block is a scatter of prints and
+  // stickers, so what it wants is depth, not a build. Each element travels at
+  // its own rate while the block crosses the screen, and the drift is symmetric
+  // about the middle of that pass: everything sits exactly on its Figma
+  // coordinate at the moment the block is centred, which is where you stop to
+  // look at it. Depth follows the paint order — the photo at the back lags
+  // furthest, the stickers in front lead — so the parallax agrees with what
+  // overlaps what instead of fighting it.
+  //
+  // Progress comes off the scroll offset rather than a measured rect, because
+  // these elements carry the transform this very function writes; reading their
+  // position back would feed the drift into its own input.
+
+  var CATS_TOP = 8220;    // canvas y, top of the upper photo
+  var CATS_H   = 1750;    // down to the bottom of the flower
+  var POP      = 0.21;    // share of the pass an element spends arriving
+
+  // A sticker's own canvas y is kept so its arrival can be timed to the moment it
+  // actually clears the bottom of the screen. A fixed share of the pass cannot
+  // do that: how much of the block fits on screen depends on the viewport and
+  // the canvas scale, and at a tall window the lower stickers would have played
+  // their whole pop while still below the fold.
+  function cat(sel, drift, spin, top, kind, tilt) {
+    var el = document.querySelector(sel);
+    if (!el) return null;
+    // a print hinges on its top edge, so it unfolds downwards onto the board
+    // rather than growing out of its own middle
+    if (kind === 'print') el.style.transformOrigin = '50% 0';
+    return { el: el, drift: drift, spin: spin || 0,
+             top: top === undefined ? -1 : top, kind: kind, tilt: tilt || 0,
+             css: '', op: '' };
+  }
+
+  // Two kinds of arrival, because the two kinds of thing want different ones. A
+  // sticker is small and light, so it pops on scale. A framed print is heavy —
+  // popping one that size looks like a bug — so it lands the way a photo dropped
+  // on a table does: a little low, a degree or two crooked, tipped back just
+  // enough to catch the depth, and then it settles square. The two tilt opposite
+  // ways so they don't read as one gesture played twice.
+  //
+  //                                         drift  spin  canvas y   arrival  entry turn
+  var cats = mqReduce.matches ? [] : [
+    cat('[src$="cats-1.webp"]',                 92,    0,     8220, 'print',  -3.2),
+    cat('[src$="cats-latte.webp"]',             58,   -8,     9574, 'pop',   -24),
+    cat('[src$="cats-2.webp"]',                 30,    0,     9096, 'print',   3.6),
+    cat('[src$="cats-sticker.webp"]',         -112,  -10,     8980, 'pop',     26),
+    cat('[src$="flower.webp"]',               -140,   12,     9685, 'pop',    -30)
+  ].filter(Boolean);
+
+  var catsPos = 0, catsTarget = 0;
+
+  function aimCats() {
+    if (!cats.length) return;
+    var vh = window.innerHeight, h = CATS_H * scale;
+    var top = CATS_TOP * scale + runway;          // document y of the block
+    catsTarget = clamp01((window.scrollY + vh - top) / (vh + h));
+  }
+
+  function drawCats(f) {
+    if (!cats.length) return;
+    catsPos += (catsTarget - catsPos) * f;
+    if (Math.abs(catsTarget - catsPos) < 0.0004) catsPos = catsTarget;
+
+    var d = catsPos - 0.5;                         // zero when the block is centred
+    var span = window.innerHeight + CATS_H * scale;
+    for (var i = 0; i < cats.length; i++) {
+      var c = cats[i];
+      var ty = c.drift * d, rz = c.spin * d, sc = 1, tip = '';
+
+      if (c.top >= 0) {
+        // The share of the pass at which this element clears the bottom edge.
+        // A print starts a little earlier than a sticker so that it is settled
+        // by the time the block is centred — which is the moment the whole
+        // composition is supposed to be sitting exactly on its Figma numbers.
+        var seen = (c.top - CATS_TOP) * scale / span;
+        var lead = c.kind === 'print' ? 0.05 : 0.03;
+        var u = clamp01((catsPos - Math.max(0, seen - lead)) / POP);
+        var rest = 1 - glide(u);
+        setStyle(c, 'op', 'opacity', clamp01(u / 0.3).toFixed(3));
+
+        if (c.kind === 'print') {
+          ty += 74 * rest;
+          rz += c.tilt * rest;
+          sc = 1 - 0.07 * rest + 0.012 * land(u);
+          // Perspective as a transform function rather than on a parent: it
+          // keeps the 3D scoped to this element and leaves the section's
+          // stacking alone. Dropped once the print has landed — left in, it
+          // holds a 2686px-wide photo in a 3D rendering context for the rest
+          // of the page's life for no benefit.
+          if (rest > 0.0005) {
+            tip = 'perspective(1500px)rotateX(' + (-44 * rest).toFixed(2) + 'deg)';
+          }
+        } else {
+          rz += c.tilt * rest;
+          sc = 1 - 0.62 * rest + 0.035 * land(u);
+        }
+      }
+
+      setStyle(c, 'css', 'transform',
+        'translate3d(0,' + ty.toFixed(2) + 'px,0)' + tip
+        + 'rotate(' + rz.toFixed(2) + 'deg)'
+        + 'scale(' + sc.toFixed(4) + ')');
+    }
+  }
+
+  function catsSettled() { return !cats.length || catsPos === catsTarget; }
+
   /* --- pinned scrolling --------------------------------------------------- */
 
   // While the pin is active the canvas is pushed down by exactly as much as the
@@ -311,6 +420,7 @@
     // the browser redo layout in between.
     var target = deckTarget();
     aimAbout();
+    aimCats();
 
     var dt = Math.min(80, now - prevAt);
     prevAt = now;
@@ -324,8 +434,9 @@
     if (Math.abs(target - deckPos) < 0.0008) deckPos = target;
     drawDeck(deckPos);
     drawAbout(f);
+    drawCats(f);
 
-    if (deckPos === target && aboutSettled() && now - movedAt > 400) {
+    if (deckPos === target && aboutSettled() && catsSettled() && now - movedAt > 400) {
       running = false;
       canvas.style.willChange = '';
       return;
@@ -351,9 +462,11 @@
   function settle() {
     deckPos = deckTarget();
     aimAbout();
+    aimCats();
     drawPin();
     drawDeck(deckPos);
     drawAbout(1);
+    drawCats(1);
   }
 
   fit();
