@@ -601,8 +601,29 @@
   /* --- anchor navigation, corrected for the scale ------------------------- */
 
   document.addEventListener('click', function (e) {
-    var link = e.target.closest('a[href^="#"]');
+    // A modified click belongs to the browser: cmd or ctrl opens a new tab,
+    // shift a new window, alt saves the target. Swallowing those would throw
+    // away the one thing a real href buys that a scroll handler cannot.
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+    var link = e.target.closest('a[href^="#"], a[href="/"]');
     if (!link) return;
+
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // The logo points at the site root, which is what a logo is expected to
+    // point at: it reads as the home page on hover, in a screen reader's list
+    // of links and to a crawler, and cmd-clicking it opens the site rather
+    // than a bare fragment. Followed literally it would reload the document to
+    // arrive at a place already on screen, so on the root the scroll stands in
+    // for the navigation. Reached from any other path it is left alone, and
+    // the href does the real thing.
+    if (link.getAttribute('href') === '/') {
+      if (location.pathname !== '/') return;
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+      return;
+    }
 
     var id = link.getAttribute('href').slice(1);
     if (!id) return;
@@ -611,8 +632,6 @@
     if (!target) return;
 
     e.preventDefault();
-
-    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // The mobile canvas has its own y for each block, on its own 393x8206
     // grid, so the section carries both and the mode picks one. No runway to
