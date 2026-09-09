@@ -198,10 +198,15 @@ the card is still far out and moving fast, so it reads as motion.
   text. Swapping in real case copy means re-exporting both.
 - Nav links, article links and the work cards point at in-page anchors. Swap in
   real URLs when the case studies and articles are published.
-- **Resume** points at `assets/resume.pdf`, which is not in the repo yet. Drop
-  the PDF in at exactly that path and the tab works — the anchors already carry
-  `target="_blank"` in both the nav bar and the footer, since `script.js` only
-  re-targets cross-host `http(s):` links and a same-origin file is not one.
+- **Resume** points at `assets/bogdana-andrijkiv-cv.pdf`, in both the nav bar and
+  the footer. The anchors carry `target="_blank"` and it holds, because
+  `script.js` only re-targets cross-host `http(s):` links and a same-origin file
+  is not one. The name is deliberately plain ASCII: the file arrived as
+  `СV_Bogdana Andrijkiv.pdf`, whose leading character is a Cyrillic С (U+0421)
+  rather than a Latin C. That is a homoglyph — indistinguishable on screen, and
+  `%D0%A1` once it is in a URL — so anyone retyping the link from sight would
+  land on a 404. Replacing the file means keeping the path, or updating both
+  anchors.
 
 ## Mobile layout
 
