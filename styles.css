@@ -981,7 +981,15 @@ img.a, .bg img { display: block; user-select: none; -webkit-user-drag: none; }
     margin: 0;
     clip-path: none;
     overflow: visible;
-    white-space: normal;
+    /* No white-space here, and that is the point. The lines above undo .sr-only
+       so the node can be seen, but white-space is the one property that must
+       not be undone: .sr-only's nowrap is already what the one-line pin above
+       asks for. Resetting it to `normal` did nothing on this line and won
+       silently on source order sixty lines later, which is how this heading —
+       alone of the four — still dropped to two lines. It only ever showed in
+       the swap font: Londrina clears the 399px box by about a pixel, Arial
+       Black needs 588, and the second line fell outside the box's fixed 72px
+       and under the CTA card, cut mid-word at the card's edge. */
     font-family: var(--font-display);
     font-weight: 900;
     font-size: 60.92px;
